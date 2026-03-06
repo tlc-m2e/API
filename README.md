@@ -30,7 +30,7 @@ Cette API est propulsée par le framework **Universal API** de Bastivan Consulti
 
 ```bash
 # Cloner le projet (Open Source)
-git clone <repository_url>
+git clone https://github.com/tlc-m2e/API.git
 cd the-life-coincoin-api
 
 # Lancer les services (API, MongoDB/MariaDB, Redis)
