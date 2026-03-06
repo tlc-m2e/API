@@ -1,0 +1,279 @@
+<?php
+
+use Bastivan\UniversalApi\Hook\Controllers\AuthController;
+use Bastivan\UniversalApi\Hook\Controllers\DuckController;
+use Bastivan\UniversalApi\Hook\Controllers\EncryptionController;
+use Bastivan\UniversalApi\Hook\Controllers\LevelUpController;
+use Bastivan\UniversalApi\Hook\Controllers\ListingController;
+use Bastivan\UniversalApi\Hook\Controllers\CollectionController;
+use Bastivan\UniversalApi\Hook\Controllers\EggController;
+use Bastivan\UniversalApi\Hook\Controllers\MarketplaceController;
+use Bastivan\UniversalApi\Hook\Controllers\NotificationController;
+use Bastivan\UniversalApi\Hook\Controllers\UserController;
+use Bastivan\UniversalApi\Hook\Controllers\UserSummaryController;
+use Bastivan\UniversalApi\Hook\Controllers\WalletController;
+use Bastivan\UniversalApi\Hook\Controllers\WorkoutController;
+use Bastivan\UniversalApi\Hook\Middleware\AuthMiddleware;
+
+/*
+|--------------------------------------------------------------------------
+| Hook Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register routes for your application.
+| Use $router to define your routes.
+|
+*/
+
+$router->get('/api/ping', function() {
+    echo json_encode(['status' => 'pong', 'timestamp' => time()]);
+});
+
+$router->get('/api/custom', [\Bastivan\UniversalApi\Hook\Controllers\CustomController::class, 'index']);
+
+// Auth Routes (and Legacy /api/auth)
+$router->post('/api/auth/register', [AuthController::class, 'register']);
+$router->post('/api/auth/login', [AuthController::class, 'login']);
+$router->post('/api/auth/send-otp', [AuthController::class, 'sendOtp']);
+$router->post('/api/auth/loginWithOtp', [AuthController::class, 'loginWithOtp']);
+
+$router->get('/api/user/me', [AuthController::class, 'me'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+
+// User Settings
+$router->get('/api/userSettings/?', [\Bastivan\UniversalApi\Hook\Controllers\UserSettingController::class, 'getAllSettings'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/userSettings/([^/]+)/?', [\Bastivan\UniversalApi\Hook\Controllers\UserSettingController::class, 'getSetting'], ['middleware' => [AuthMiddleware::class]]);
+$router->put('/api/userSettings/([^/]+)/?', [\Bastivan\UniversalApi\Hook\Controllers\UserSettingController::class, 'updateSetting'], ['middleware' => [AuthMiddleware::class]]);
+
+// --- New NestJS-style User Routes (Prefixed with /api) ---
+$router->post('/api/users/2faEnabled', [UserController::class, 'twoFactorEnabled']); // Public
+$router->post('/api/users/loginWithOtp', [AuthController::class, 'loginWithOtp']); // Public
+$router->post('/api/users/refresh', [UserController::class, 'refreshToken']); // Public
+$router->post('/api/users/otp', [AuthController::class, 'sendOtp']); // Public
+$router->get('/api/users/me', [AuthController::class, 'me'], ['middleware' => [AuthMiddleware::class]]);
+$router->put('/api/users/me', [UserController::class, 'updateMe'], ['middleware' => [AuthMiddleware::class]]);
+$router->delete('/api/users/me', [UserController::class, 'deleteMe'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/users/profilePicture', [UserController::class, 'getMeProfilePicture'], ['middleware' => [AuthMiddleware::class]]);
+$router->put('/api/users/profilePicture', [UserController::class, 'updateMeProfilePicture'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/users/request2FASetupKey', [UserController::class, 'generate2fa'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/users/verify2FAToken', [UserController::class, 'verify2fa'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/users/updatePassword', [UserController::class, 'updatePassword'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/users/sendOtp', [AuthController::class, 'sendOtp'], ['middleware' => [AuthMiddleware::class]]);
+
+$router->get('/api/users/admin', [UserController::class, 'listUsers'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/users/admin/addTicketToUsers', [UserController::class, 'addTicketToUsers'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/users/user/([a-f0-9]{24})/notify', [UserController::class, 'sendUserNotification'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/users/user/([a-f0-9]{24})', [UserController::class, 'getUser'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/users/user/([a-f0-9]{24})', [UserController::class, 'updateUser'], ['middleware' => [AuthMiddleware::class]]);
+
+// Encryption Routes (Admin)
+$router->post('/api/encryption/cypher', [EncryptionController::class, 'cypher'], ['middleware' => [AuthMiddleware::class]]);
+
+// ------------------------------------
+
+// User Routes (Legacy)
+$router->post('/api/users/refresh-token', [UserController::class, 'refreshToken'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/users/2fa/generate', [UserController::class, 'generate2fa'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/users/2fa/enable', [UserController::class, 'enable2fa'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/users/2fa/verify', [UserController::class, 'verify2fa'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/users/2fa/validate', [UserController::class, 'validate2fa'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/users/2fa/disable', [UserController::class, 'disable2fa'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+
+// Notification Routes (Admin)
+$router->get('/api/notifications/onlineUsers', [NotificationController::class, 'onlineUsers'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/notifications/notify/users', [NotificationController::class, 'notifyUsers'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/notifications/notify/groups', [NotificationController::class, 'notifyGroups'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+
+// User Admin Routes (Legacy)
+$router->post('/api/users/admin/ban/([a-f0-9]{24})', [UserController::class, 'banUser'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->put('/api/users/admin/([a-f0-9]{24})', [UserController::class, 'updateUser'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->delete('/api/users/admin/([a-f0-9]{24})', [UserController::class, 'deleteUser'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+
+// User Summary Routes
+$router->get('/api/users/summary/get', [UserSummaryController::class, 'getAll'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/users/summary/get/([^/]+)', [UserSummaryController::class, 'get'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/users/summary/get/([^/]+)/([a-f0-9]{24})/([^/]+)', [UserSummaryController::class, 'get'], ['middleware' => [AuthMiddleware::class]]);
+
+// Wallet Routes
+$router->get('/api/wallet/?', [WalletController::class, 'getWallet'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/wallet/getSolBalance', [WalletController::class, 'getSolBalance'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/wallet/getBalance', [WalletController::class, 'getBalance'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/wallet/ducksTokensId', [WalletController::class, 'getDucksTokensId'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/wallet/nfts', [WalletController::class, 'getNfts'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/wallet/eggs', [WalletController::class, 'getEggs'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/wallet/import', [WalletController::class, 'importWallet'], ['middleware' => [AuthMiddleware::class]]);
+
+// Game Routes (Protected)
+$router->get('/api/ducks', [DuckController::class, 'list'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->get('/api/ducks/([a-f0-9]{24})', [DuckController::class, 'get'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/ducks/([a-f0-9]{24})/levelup', [DuckController::class, 'levelUp'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+
+$router->get('/api/eggs', [EggController::class, 'list'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->get('/api/eggs/([a-f0-9]{24})', [EggController::class, 'get'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+
+// Marketplace Routes
+$router->get('/api/marketplace/listings', [MarketplaceController::class, 'getListings']);
+$router->post('/api/marketplace/listings', [MarketplaceController::class, 'createListing'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->get('/api/marketplace/pots', [MarketplaceController::class, 'getPots']);
+
+// Marketplace Listing Routes (Specific)
+$router->get('/api/marketplace/listing/?', [ListingController::class, 'index']);
+$router->post('/api/marketplace/listing/?', [ListingController::class, 'create'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/marketplace/listing/buy/([a-f0-9]{24})', [ListingController::class, 'buy'], ['middleware' => [AuthMiddleware::class]]);
+$router->delete('/api/marketplace/listing/([a-f0-9]{24})', [ListingController::class, 'delete'], ['middleware' => [AuthMiddleware::class]]);
+
+// Spending Wallet Routes (Unified)
+$router->get('/api/spending/getTickets', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'getTickets'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/getBalance', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'getBalance'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/duckTeam', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'duckTeam'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/stats', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'stats'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/spending/admin/burnWallet', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'burnWallet'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/admin', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'listWallets'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/admin/getBalance/([a-f0-9]{24})', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'getWalletBalance'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/spending/admin/setMaxEndurance/([a-f0-9]{24})', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'setMaxEndurance'], ['middleware' => [AuthMiddleware::class]]);
+
+// Energy Routes
+// Activity Routes
+$router->get('/api/activity/?', [\Bastivan\UniversalApi\Hook\Controllers\ActivityController::class, 'index'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+
+$router->get('/api/energy', [\Bastivan\UniversalApi\Hook\Controllers\EnergyController::class, 'getEnergy'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/energy/refill', [\Bastivan\UniversalApi\Hook\Controllers\EnergyController::class, 'refill'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->post('/api/energy/forceRecomputeMaximumEnergyForSpending', [\Bastivan\UniversalApi\Hook\Controllers\EnergyController::class, 'forceRecomputeMaximumEnergyForSpending'], [
+    'middleware' => [AuthMiddleware::class] 
+]);
+$router->get('/api/stats/entity/([a-zA-Z0-9_]+)', [\Bastivan\UniversalApi\Hook\Controllers\StatsController::class, 'getEntityStats']);
+
+// Workout Routes (Unified)
+$router->post('/api/workout/calculateUsersSummary', [WorkoutController::class, 'calculateUsersSummary'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/workout/?', [WorkoutController::class, 'list'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/workout/restore', [WorkoutController::class, 'restore'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/workout/hasWorkout', [WorkoutController::class, 'hasWorkout'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/workout/init', [WorkoutController::class, 'init'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/workout/location', [WorkoutController::class, 'location'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/workout/compute', [WorkoutController::class, 'compute'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/workout/finish', [WorkoutController::class, 'finish'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/workout/passive/estimate', [WorkoutController::class, 'estimatePassive'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/workout/passive/execute', [WorkoutController::class, 'executePassive'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/workout/([a-f0-9]{24})', [WorkoutController::class, 'get'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/workout/([a-f0-9]{24})/ai-analysis', [WorkoutController::class, 'analyze'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/workout/recomputeFinalStats/([a-f0-9]{24})', [WorkoutController::class, 'recomputeFinalStats'], ['middleware' => [AuthMiddleware::class]]);
+
+// Transfer Attempt Routes
+$router->post('/api/transfers/attempt/init', [\Bastivan\UniversalApi\Hook\Controllers\TransferAttemptController::class, 'init'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/transfers/attempt/?', [\Bastivan\UniversalApi\Hook\Controllers\TransferAttemptController::class, 'list'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/transfers/attempt/check/([^/]+)', [\Bastivan\UniversalApi\Hook\Controllers\TransferAttemptController::class, 'check'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/transfers/attempt/removeDuplicatesTokensIdNfts', [\Bastivan\UniversalApi\Hook\Controllers\TransferAttemptController::class, 'removeDuplicatesTokensIdNfts'], ['middleware' => [AuthMiddleware::class]]);
+
+// Swap Routes
+$router->post('/api/transfers/swap/mintCat', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'mintCat'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/transfers/swap/poolClaim/([^/]+)/([^/]+)', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'poolClaim'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/transfers/swap/pool/([^/]+)/([^/]+)/?([^/]*)/?([^/]*)', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'getPoolDetails'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/transfers/swap/get/([^/]+)', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'getSwap'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/transfers/swap/', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'swap'], ['middleware' => [AuthMiddleware::class]]);
+
+// Game Constants Routes
+$router->get('/api/gameConstants/?', [\Bastivan\UniversalApi\Hook\Controllers\GameConstantController::class, 'list'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+$router->get('/api/gameConstants/public/?', [\Bastivan\UniversalApi\Hook\Controllers\GameConstantController::class, 'listPublic']);
+$router->post('/api/gameConstants/public/([^/]+)', [\Bastivan\UniversalApi\Hook\Controllers\GameConstantController::class, 'getPublicByKey']);
+$router->put('/api/gameConstants/([a-f0-9]{24})', [\Bastivan\UniversalApi\Hook\Controllers\GameConstantController::class, 'update'], [
+    'middleware' => [AuthMiddleware::class]
+]);
+
+// --- SwarmGen Mint Routes ---
+$router->get('/api/swarmGen/mint/?', [\Bastivan\UniversalApi\Hook\Controllers\MintController::class, 'mintRules'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/mint/([a-f0-9]{24})/([a-f0-9]{24})', [\Bastivan\UniversalApi\Hook\Controllers\MintController::class, 'mint'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/mint', [\Bastivan\UniversalApi\Hook\Controllers\MintController::class, 'executeMint'], ['middleware' => [AuthMiddleware::class]]);
+
+// --- SwarmGen Level Up Routes ---
+$router->post('/api/swarmGen/levelUp/duck/([a-f0-9]{24})', [LevelUpController::class, 'levelUp'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/levelUp/duck/([a-f0-9]{24})/accelerate', [LevelUpController::class, 'accelerate'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/levelUp/duck/([a-f0-9]{24})/unlockPocket', [LevelUpController::class, 'unlockPocket'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/levelUp/duck/([a-f0-9]{24})/attributes', [LevelUpController::class, 'attributes'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/levelUp/duck/([a-f0-9]{24})', [LevelUpController::class, 'getInfo'], ['middleware' => [AuthMiddleware::class]]);
+// --- SwarmGen Collections Routes ---
+$router->get('/api/swarmGen/collections/?', [CollectionController::class, 'list']); // Public
+
+// --- SwarmGen Egg Routes ---
+$router->get('/api/swarmGen/egg/importTest', [EggController::class, 'importTest']); // Public
+
+// Admin/Static routes first to avoid regex collision
+$router->get('/api/swarmGen/egg/admin', [EggController::class, 'adminList'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/egg/stats', [EggController::class, 'stats'], ['middleware' => [AuthMiddleware::class]]);
+$router->put('/api/swarmGen/egg/updateOwnership/([a-f0-9]{24})', [EggController::class, 'updateOwnership'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/egg/getEgg/([a-f0-9]{24})', [EggController::class, 'getEggById'], ['middleware' => [AuthMiddleware::class]]);
+
+// Dynamic ID routes
+$router->get('/api/swarmGen/egg/([a-f0-9]{24})/get', [EggController::class, 'getEggDetail'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/egg/([a-f0-9]{24})/open', [EggController::class, 'open'], ['middleware' => [AuthMiddleware::class]]);
+
+// Dynamic Collection routes
+$router->get('/api/swarmGen/egg/([^/]+)/generate', [EggController::class, 'generate']); // Public
+$router->get('/api/swarmGen/egg/([^/]+)/getEggs', [EggController::class, 'getEggsByCollection'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/egg/([^/]+)/getEgg/([a-f0-9]{24})', [EggController::class, 'getEggByCollectionAndId'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/egg/([^/]+)/create', [EggController::class, 'create'], ['middleware' => [AuthMiddleware::class]]);
+
+// --- SwarmGen Duck Routes ---
+$router->get('/api/swarmGen/duck/importTest', [DuckController::class, 'importTest']); // Public
+
+// Specific Admin/Static routes first
+$router->get('/api/swarmGen/duck/stats', [DuckController::class, 'stats'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/duck/admin', [DuckController::class, 'adminList'], ['middleware' => [AuthMiddleware::class]]);
+$router->put('/api/swarmGen/duck/updateOwnership/([a-f0-9]{24})', [DuckController::class, 'updateOwnership'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/duck/getDuck/([a-f0-9]{24})', [DuckController::class, 'getDuckById'], ['middleware' => [AuthMiddleware::class]]);
+
+// Dynamic ID routes
+$router->get('/api/swarmGen/duck/([a-f0-9]{24})/get', [DuckController::class, 'getDuckDetail'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/duck/([a-f0-9]{24})/set', [DuckController::class, 'setDuck'], ['middleware' => [AuthMiddleware::class]]);
+
+// Dynamic Collection routes
+$router->get('/api/swarmGen/duck/([^/]+)/getDucksForUser/([a-f0-9]{24})', [DuckController::class, 'getDucksForUser'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/duck/([^/]+)/getDucks', [DuckController::class, 'getDucks'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/duck/([^/]+)/getDuck/([a-f0-9]{24})', [DuckController::class, 'getDuckByCollectionAndId'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/duck/([^/]+)/deleteAllTokensId', [DuckController::class, 'deleteAllTokensId'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/duck/([^/]+)/generate', [DuckController::class, 'generate'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/duck/([^/]+)/create', [DuckController::class, 'create'], ['middleware' => [AuthMiddleware::class]]);

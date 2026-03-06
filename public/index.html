@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE LIFE COINCOIN - M2E Demo</title>
+    <style>
+        nav {
+            background-color: #f39c12;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        body { font-family: 'Arial', sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #f39c12; }
+        .panel { border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .btn { background-color: #f39c12; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
+        .btn:hover { background-color: #d68910; }
+        .stats { display: flex; justify-content: space-between; flex-wrap: wrap; margin-top: 10px; }
+        .stat-box { background: #eee; padding: 10px; border-radius: 5px; width: 45%; margin-bottom: 10px; text-align: center; }
+        .stat-box strong { display: block; font-size: 18px; color: #2c3e50; }
+        #auth-panel { display: block; }
+        #app-panel { display: none; }
+        #logs { background: #333; color: #0f0; padding: 10px; border-radius: 5px; height: 150px; overflow-y: scroll; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <nav>
+        <a href="/">M2E Demo</a>
+        <a href="/user.html">Marketplace (User)</a>
+        <a href="/admin.html">Admin Dashboard</a>
+    </nav>
+    <h1>🦆 THE LIFE COINCOIN</h1>
+    <p style="text-align: center;">Move-to-Earn API Demo Interface</p>
+
+    <!-- Login Panel -->
+    <div id="auth-panel" class="panel">
+        <h2>Login / Register</h2>
+        <p>Login to start tracking your runs and earning COINs.</p>
+        <button class="btn" onclick="demoLogin()">Login to Demo Account</button>
+    </div>
+
+    <!-- App Panel -->
+    <div id="app-panel">
+        <div class="panel">
+            <h2>Wallet Balance</h2>
+            <div class="stats">
+                <div class="stat-box">SOL: <strong id="bal-sol">0.00</strong></div>
+                <div class="stat-box">COIN: <strong id="bal-coin">0.00</strong></div>
+                <div class="stat-box">TOKEN: <strong id="bal-token">0.00</strong></div>
+                <div class="stat-box">Seed: <strong id="bal-seed">0.00</strong></div>
+            </div>
+            <p>Energy: <span id="energy">0</span> / 10</p>
+        </div>
+
+        <div class="panel">
+            <h2>Workout Tracker</h2>
+            <p id="workout-status">Status: Idle</p>
+            <button class="btn" id="run-btn" onclick="toggleRun()">Start Running</button>
+        </div>
+
+        <div class="panel">
+            <h2>Activity Logs</h2>
+            <div id="logs"></div>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

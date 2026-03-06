@@ -1,0 +1,39 @@
+{
+    "name": "bastivan-consulting/universal-api",
+    "description": "Fondations d'une API universelle en PHP 8.4 par Bastivan Consulting",
+    "type": "project",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Bastivan Consulting",
+            "email": "dev@bastivan.consulting"
+        }
+    ],
+    "require": {
+        "php": ">=8.4",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "aws/aws-sdk-php": "^3.369",
+        "firebase/php-jwt": "^7.0.2",
+        "mongodb/mongodb": "^2.1.2",
+        "monolog/monolog": "^3.5",
+        "phpmailer/phpmailer": "^6.9",
+        "predis/predis": "^3.3",
+        "robthree/twofactorauth": "^3.0",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bastivan\\UniversalApi\\": "src/",
+            "Bastivan\\UniversalApi\\Hook\\": "hook/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
+}

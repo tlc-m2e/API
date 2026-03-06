@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tlc
+  labels:
+    app: tlc
+    vendor: bastivan-consulting
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tlc
+  template:
+    metadata:
+      labels:
+        app: tlc
+    spec:
+      # InitContainer pour copier le code vers le volume partagé afin que Nginx puisse le servir
+      initContainers:
+      - name: init-code
+        image: bastivan-consulting/tlc-app:latest
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "cp -r /var/www/html/. /shared-code/"]
+        volumeMounts:
+        - name: app-code
+          mountPath: /shared-code
+
+      containers:
+      # Application PHP-FPM
+      - name: app
+        image: bastivan-consulting/tlc-app:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9000
+        env:
+        - name: APP_ENV
+          value: "production"
+        - name: DB_CONNECTION
+          value: "mysql"
+        - name: DB_HOST
+          value: "db"
+        - name: REDIS_HOST
+          value: "redis"
+        # On ne monte PAS le volume sur /var/www/html ici car l'image contient déjà le code.
+        # PHP-FPM sert les fichiers depuis son propre système de fichiers.
+        # Le volume partagé sert uniquement à Nginx pour les assets statiques.
+
+      # Sidecar Nginx
+      - name: web
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: app-code
+          mountPath: /var/www/html
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+        - name: ssl-certs
+          mountPath: /etc/nginx/certs
+          readOnly: true
+
+      volumes:
+      - name: app-code
+        emptyDir: {}
+      - name: nginx-config
+        configMap:
+          name: tlc-nginx-config
+      - name: ssl-certs
+        secret:
+          secretName: tlc-tls
