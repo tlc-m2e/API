@@ -119,24 +119,194 @@ class AuthController
             return;
         }
 
-        // Check if user exists
+        // Check if user exists by email
         if ($this->userModel->findOne(['email' => $data['email']])) {
             http_response_code(409);
-            echo json_encode(['error' => 'User already exists']);
+            echo json_encode(['error' => 'User already exists with this email']);
+            return;
+        }
+
+        // Check if user exists by pseudo if provided
+        if (!empty($data['pseudo']) && $this->userModel->findOne(['pseudo' => $data['pseudo']])) {
+            http_response_code(409);
+            echo json_encode(['error' => 'User already exists with this pseudo']);
             return;
         }
 
         $hash = password_hash($data['password'], PASSWORD_DEFAULT);
 
-        $userId = $this->userModel->create([
+        $userData = [
             'email' => $data['email'],
             'password' => $hash,
             'name' => $data['name'] ?? '',
+            'first_name' => $data['first_name'] ?? '',
+            'last_name' => $data['last_name'] ?? '',
+            'age' => isset($data['age']) ? (int)$data['age'] : null,
+            'gender' => $data['gender'] ?? '',
+            'pseudo' => $data['pseudo'] ?? '',
+            'is_public' => true,
             'role' => 'user'
-        ]);
+        ];
+
+        $userId = $this->userModel->create($userData);
 
         http_response_code(201);
         echo json_encode(['message' => 'User created', 'id' => (string)$userId]);
+    }
+
+    private function verifySocialToken($provider, $token)
+    {
+        $email = null;
+        $name = '';
+        $socialId = '';
+
+        try {
+            switch (strtolower($provider)) {
+                case 'google':
+                    // Verify Google token
+                    $url = "https://oauth2.googleapis.com/tokeninfo?id_token=" . urlencode($token);
+                    $response = @file_get_contents($url);
+                    if ($response) {
+                        $data = json_decode($response, true);
+                        if (isset($data['email'])) {
+                            $email = $data['email'];
+                            $name = $data['name'] ?? '';
+                            $socialId = $data['sub'] ?? '';
+                        }
+                    }
+                    break;
+                case 'facebook':
+                    // Verify Facebook token
+                    $url = "https://graph.facebook.com/me?fields=id,name,email&access_token=" . urlencode($token);
+                    $response = @file_get_contents($url);
+                    if ($response) {
+                        $data = json_decode($response, true);
+                        if (isset($data['email']) || isset($data['id'])) {
+                            $email = $data['email'] ?? ($data['id'] . '@facebook.local'); // Fallback if email not shared
+                            $name = $data['name'] ?? '';
+                            $socialId = $data['id'] ?? '';
+                        }
+                    }
+                    break;
+                case 'discord':
+                    // Verify Discord token (requires Bearer authorization header)
+                    $opts = [
+                        "http" => [
+                            "method" => "GET",
+                            "header" => "Authorization: Bearer " . $token . "\r\n"
+                        ]
+                    ];
+                    $context = stream_context_create($opts);
+                    $url = "https://discord.com/api/users/@me";
+                    $response = @file_get_contents($url, false, $context);
+                    if ($response) {
+                        $data = json_decode($response, true);
+                        if (isset($data['id'])) {
+                            $email = $data['email'] ?? ($data['id'] . '@discord.local');
+                            $name = $data['username'] ?? '';
+                            $socialId = $data['id'] ?? '';
+                        }
+                    }
+                    break;
+                case 'x':
+                case 'twitter':
+                    // Verify X/Twitter token (OAuth 2.0 Bearer Token)
+                    $opts = [
+                        "http" => [
+                            "method" => "GET",
+                            "header" => "Authorization: Bearer " . $token . "\r\n"
+                        ]
+                    ];
+                    $context = stream_context_create($opts);
+                    $url = "https://api.twitter.com/2/users/me?user.fields=id,name,username";
+                    $response = @file_get_contents($url, false, $context);
+                    if ($response) {
+                        $data = json_decode($response, true);
+                        if (isset($data['data']['id'])) {
+                            $userData = $data['data'];
+                            $email = ($userData['username'] ?? $userData['id']) . '@twitter.local'; // X API v2 doesn't always return email easily without special permissions
+                            $name = $userData['name'] ?? '';
+                            $socialId = $userData['id'] ?? '';
+                        }
+                    }
+                    break;
+            }
+        } catch (\Exception $e) {
+            // Log error or ignore and return false
+            return false;
+        }
+
+        if ($email && $socialId) {
+            return [
+                'email' => $email,
+                'name' => $name,
+                'social_id' => $socialId
+            ];
+        }
+
+        return false;
+    }
+
+    public function loginWithSocial()
+    {
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (empty($data['provider']) || empty($data['token'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Provider and token are required']);
+            return;
+        }
+
+        $provider = $data['provider']; // facebook, discord, x, google
+        $token = $data['token'];
+
+        $socialData = $this->verifySocialToken($provider, $token);
+
+        if (!$socialData) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Invalid or expired social token']);
+            return;
+        }
+
+        $email = $socialData['email'];
+
+        $user = $this->userModel->findOne(['email' => $email]);
+
+        if (!$user) {
+            // Auto-register the user if they don't exist
+
+            // Generate a unique pseudo
+            $basePseudo = strtolower($provider) . '_' . substr($socialData['social_id'], 0, 8);
+            $pseudo = $basePseudo;
+            $counter = 1;
+            while ($this->userModel->findOne(['pseudo' => $pseudo])) {
+                $pseudo = $basePseudo . $counter;
+                $counter++;
+            }
+
+            $userData = [
+                'email' => $email,
+                'password' => password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), // Random password for social logins
+                'name' => $socialData['name'],
+                'pseudo' => $pseudo,
+                'is_public' => true,
+                'role' => 'user'
+            ];
+            $userId = $this->userModel->create($userData);
+            $user = $this->userModel->findById((string)$userId);
+        }
+
+        $tokenStr = $this->jwtService->sign([
+            'id' => (string)$user['_id'],
+            'email' => $user['email']
+        ]);
+
+        echo json_encode(['accessToken' => $tokenStr, 'user' => [
+            'id' => (string)$user['_id'],
+            'email' => $user['email'],
+            'pseudo' => $user['pseudo'] ?? '',
+            'name' => $user['name'] ?? ''
+        ]]);
     }
 
     public function login()

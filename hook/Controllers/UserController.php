@@ -299,7 +299,6 @@ class UserController
         echo json_encode(['message' => 'User deleted']);
     }
 
-    // New methods from NestJS controller
 
     public function twoFactorEnabled()
     {
@@ -331,11 +330,26 @@ class UserController
 
         $updateData = [];
         if (isset($data['name'])) $updateData['name'] = $data['name'];
+        if (isset($data['first_name'])) $updateData['first_name'] = $data['first_name'];
+        if (isset($data['last_name'])) $updateData['last_name'] = $data['last_name'];
+        if (isset($data['age'])) $updateData['age'] = (int)$data['age'];
         if (isset($data['gender'])) $updateData['gender'] = $data['gender'];
+        if (isset($data['pseudo'])) $updateData['pseudo'] = $data['pseudo'];
         if (isset($data['profilePicture'])) $updateData['profilePicture'] = $data['profilePicture'];
+        if (isset($data['is_public'])) $updateData['is_public'] = (bool)$data['is_public'];
 
         if (isset($data['password'])) {
             $updateData['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+
+        // Check if pseudo is already taken by someone else
+        if (isset($updateData['pseudo']) && $updateData['pseudo'] !== ($user['pseudo'] ?? '')) {
+            $existing = $this->userModel->findOne(['pseudo' => $updateData['pseudo']]);
+            if ($existing && (string)$existing['_id'] !== (string)$user['_id']) {
+                http_response_code(409);
+                echo json_encode(['error' => 'Pseudo already taken']);
+                return;
+            }
         }
 
         if (!empty($updateData)) {
@@ -351,6 +365,51 @@ class UserController
         echo json_encode(['item' => $updatedUser]);
     }
 
+    public function getPublicProfile($pseudo)
+    {
+        $user = $this->userModel->findOne(['pseudo' => $pseudo]);
+
+        if (!$user) {
+            http_response_code(404);
+            echo json_encode(['error' => 'User not found']);
+            return;
+        }
+
+        if (!isset($user['is_public']) || !$user['is_public']) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Profile is private']);
+            return;
+        }
+
+        // Fetch ducks
+        $duckModel = new \Bastivan\UniversalApi\Hook\Models\Duck();
+        $ducks = $duckModel->find(['owner_id' => (string)$user['_id']]);
+
+        // Fetch workout stats (e.g. total distance)
+        $workoutModel = new \Bastivan\UniversalApi\Hook\Models\Workout();
+        $workouts = $workoutModel->find(['user_id' => (string)$user['_id']]);
+
+        $totalDistance = 0;
+        foreach ($workouts as $w) {
+            $totalDistance += (float)($w['distance'] ?? 0);
+        }
+
+        echo json_encode([
+            'profile' => [
+                'pseudo' => $user['pseudo'],
+                'name' => $user['name'] ?? '',
+                'total_distance_km' => $totalDistance,
+                'ducks' => array_map(function($duck) {
+                    return [
+                        'id' => (string)$duck['_id'],
+                        'name' => $duck['name'] ?? '',
+                        'level' => $duck['level'] ?? 1
+                    ];
+                }, $ducks)
+            ]
+        ]);
+    }
+
     public function deleteMe()
     {
         $user = $this->getCurrentUser();
@@ -362,7 +421,6 @@ class UserController
     {
         $user = $this->getCurrentUser();
         // Since we don't have AWS S3 service integration here, we return the stored URL or base64
-        // Logic in NestJS was fetching from S3. Here we return what we have.
         echo json_encode(['item' => $user['profilePicture'] ?? '']);
     }
 

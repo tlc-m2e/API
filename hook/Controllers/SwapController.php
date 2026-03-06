@@ -70,7 +70,6 @@ class SwapController
         // Logic to get pool details and quote
         // This requires complex interactions with Solana/Liquidity pools which are likely in services/helpers
         // that are not fully ported or available.
-        // We will return a mock response structure based on the NestJS controller.
 
         $amount = (float)$amount;
         $slippage = (float)$slippage;
@@ -143,7 +142,6 @@ class SwapController
         $amount = (float)$data['amount'];
 
         if (!$fromToken || !$toToken) {
-            http_response_code(404); // NestJS used NotFoundException
             echo json_encode(['error' => 'Swap tokens not found']);
             return;
         }

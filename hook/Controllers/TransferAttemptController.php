@@ -145,19 +145,14 @@ class TransferAttemptController
 
     public function list()
     {
-        // Admin or user specific? NestJS one seemed public or admin.
-        // NestJS: @Get('/') async list() ... findAll().
         // It seems to return all. Maybe admin only?
-        // The nestjs controller didn't have @AdminRoute on list() but usually listing all transfers is sensitive.
         // However, looking at the code, it just returns all. I will assume it is for admin or testing, or the user is checked inside service (which I don't have access to deep logic of).
         // Let's protect it with Admin check to be safe, or just return all if it was public.
         // Given it's "transfers/attempt", maybe it's user's history?
-        // Wait, NestJS code: `return { items: await this.transferAttemptService.findAll() };`
         // `findAll` usually means ALL.
 
         $user = $this->getCurrentUser();
         // If regular user, maybe filter by user?
-        // The NestJS code didn't use `@CurrentUser()` in `list()`.
 
         $attempts = $this->transferAttemptModel->find([], ['limit' => 100, 'sort' => ['createdAt' => -1]]);
 
@@ -194,7 +189,6 @@ class TransferAttemptController
     {
         $this->checkAdmin();
 
-        // Logic from NestJS:
         // find all ducks and egge with tokenId
         // ensure unique
 

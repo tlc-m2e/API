@@ -3,6 +3,7 @@
 use Bastivan\UniversalApi\Hook\Controllers\AuthController;
 use Bastivan\UniversalApi\Hook\Controllers\DuckController;
 use Bastivan\UniversalApi\Hook\Controllers\EncryptionController;
+use Bastivan\UniversalApi\Hook\Controllers\FriendController;
 use Bastivan\UniversalApi\Hook\Controllers\LevelUpController;
 use Bastivan\UniversalApi\Hook\Controllers\ListingController;
 use Bastivan\UniversalApi\Hook\Controllers\CollectionController;
@@ -34,6 +35,7 @@ $router->get('/api/custom', [\Bastivan\UniversalApi\Hook\Controllers\CustomContr
 // Auth Routes (and Legacy /api/auth)
 $router->post('/api/auth/register', [AuthController::class, 'register']);
 $router->post('/api/auth/login', [AuthController::class, 'login']);
+$router->post('/api/auth/loginWithSocial', [AuthController::class, 'loginWithSocial']);
 $router->post('/api/auth/send-otp', [AuthController::class, 'sendOtp']);
 $router->post('/api/auth/loginWithOtp', [AuthController::class, 'loginWithOtp']);
 
@@ -46,7 +48,6 @@ $router->get('/api/userSettings/?', [\Bastivan\UniversalApi\Hook\Controllers\Use
 $router->get('/api/userSettings/([^/]+)/?', [\Bastivan\UniversalApi\Hook\Controllers\UserSettingController::class, 'getSetting'], ['middleware' => [AuthMiddleware::class]]);
 $router->put('/api/userSettings/([^/]+)/?', [\Bastivan\UniversalApi\Hook\Controllers\UserSettingController::class, 'updateSetting'], ['middleware' => [AuthMiddleware::class]]);
 
-// --- New NestJS-style User Routes (Prefixed with /api) ---
 $router->post('/api/users/2faEnabled', [UserController::class, 'twoFactorEnabled']); // Public
 $router->post('/api/users/loginWithOtp', [AuthController::class, 'loginWithOtp']); // Public
 $router->post('/api/users/refresh', [UserController::class, 'refreshToken']); // Public
@@ -54,6 +55,7 @@ $router->post('/api/users/otp', [AuthController::class, 'sendOtp']); // Public
 $router->get('/api/users/me', [AuthController::class, 'me'], ['middleware' => [AuthMiddleware::class]]);
 $router->put('/api/users/me', [UserController::class, 'updateMe'], ['middleware' => [AuthMiddleware::class]]);
 $router->delete('/api/users/me', [UserController::class, 'deleteMe'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/users/profile/([^/]+)', [UserController::class, 'getPublicProfile']); // Public
 $router->get('/api/users/profilePicture', [UserController::class, 'getMeProfilePicture'], ['middleware' => [AuthMiddleware::class]]);
 $router->put('/api/users/profilePicture', [UserController::class, 'updateMeProfilePicture'], ['middleware' => [AuthMiddleware::class]]);
 $router->get('/api/users/request2FASetupKey', [UserController::class, 'generate2fa'], ['middleware' => [AuthMiddleware::class]]);
@@ -277,3 +279,10 @@ $router->get('/api/swarmGen/duck/([^/]+)/getDuck/([a-f0-9]{24})', [DuckControlle
 $router->post('/api/swarmGen/duck/([^/]+)/deleteAllTokensId', [DuckController::class, 'deleteAllTokensId'], ['middleware' => [AuthMiddleware::class]]);
 $router->get('/api/swarmGen/duck/([^/]+)/generate', [DuckController::class, 'generate'], ['middleware' => [AuthMiddleware::class]]);
 $router->post('/api/swarmGen/duck/([^/]+)/create', [DuckController::class, 'create'], ['middleware' => [AuthMiddleware::class]]);
+
+// Friends routes
+$router->post('/api/friends/request', [FriendController::class, 'sendRequest'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/friends/respond', [FriendController::class, 'respondRequest'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/friends/?', [FriendController::class, 'getFriends'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/friends/pending', [FriendController::class, 'getPendingRequests'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/friends/running', [FriendController::class, 'getRunningFriends'], ['middleware' => [AuthMiddleware::class]]);

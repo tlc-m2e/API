@@ -48,10 +48,8 @@ class UserSummaryController
 
         $filter = ['user_id' => $user['_id']];
         // If we want to filter out objects, we might check if object_id is set or not.
-        // NestJS logic: getAllSummaryForUser(user, includeObjects)
         // If includeObjects is false, it excludes summaries where object_id is present?
         // Or specific keys?
-        // Based on NestJS code:
         // if (!includeObjects) { query.where('object_id').exists(false); }
 
         if (!$includeObjects) {

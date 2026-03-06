@@ -15,7 +15,9 @@ Cette API est propulsée par le framework **Universal API** de Bastivan Consulti
     *   Élevage d'Oeufs.
     *   Système d'Énergie et d'Endurance.
 *   **Marketplace** : Achat et vente d'actifs in-game.
-*   **Sécurité Avancée** : Authentification JWT, 2FA (TOTP), et OTP par Email.
+*   **Sécurité Avancée** : Authentification JWT, 2FA (TOTP), OTP par Email, et Social Logins (Google, Facebook, Discord, X).
+*   **Social & Amis** : Système de demande d'amis, suivi en temps réel de la course des amis, profils publics/privés.
+*   **Intégration IA** : Utilisation d'IA pour analyser les entraînements et bien plus.
 *   **Administration** : Outils complets pour la gestion des utilisateurs, des wallets et des constantes de jeu.
 *   **Base de données Agnostique** : Compatible MongoDB et MariaDB.
 
@@ -30,8 +32,8 @@ Cette API est propulsée par le framework **Universal API** de Bastivan Consulti
 
 ```bash
 # Cloner le projet (Open Source)
-git clone https://github.com/tlc-m2e/API.git
-cd the-life-coincoin-api
+git clone https://github.com/tlc-m2e/API
+cd API
 
 # Lancer les services (API, MongoDB/MariaDB, Redis)
 docker-compose up -d --build
@@ -52,6 +54,7 @@ La sécurité est au cœur de l'application. Toutes les routes protégées néce
 |---------|----------|-------------|
 | `POST` | `/api/auth/register` | Création d'un nouveau compte joueur. |
 | `POST` | `/api/auth/login` | Connexion (email/password). Retourne le token JWT. |
+| `POST` | `/api/auth/loginWithSocial` | Connexion via token OAuth (Google, Facebook, Discord, X). |
 | `POST` | `/api/auth/send-otp` | Envoi d'un code OTP par email. |
 | `POST` | `/api/auth/loginWithOtp` | Connexion via code OTP. |
 | `GET` | `/api/user/me` | Récupérer les informations du joueur connecté. |
@@ -65,6 +68,16 @@ La sécurité est au cœur de l'application. Toutes les routes protégées néce
 | `POST` | `/api/users/2fa/verify` | Vérifier un code 2FA. |
 | `POST` | `/api/users/2fa/validate` | Valider une session 2FA. |
 | `POST` | `/api/users/2fa/disable` | Désactiver le 2FA. |
+
+### 🤝 Social & Amis
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| `GET` | `/api/users/profile/{pseudo}` | Voir le profil public d'un joueur. |
+| `POST` | `/api/friends/request` | Envoyer une demande d'ami. |
+| `POST` | `/api/friends/respond` | Accepter ou refuser une demande. |
+| `GET` | `/api/friends/` | Liste des amis. |
+| `GET` | `/api/friends/running` | Voir les amis actuellement en train de courir. |
 
 ### 🏃 Fitness & Workouts (Move-to-Earn)
 
