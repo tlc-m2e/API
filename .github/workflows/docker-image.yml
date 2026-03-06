@@ -18,34 +18,39 @@ jobs:
 
     - name: Setup environment
       run: |
+        # On se place dans le dossier de l'API pour les commandes suivantes
+        cd tlc-m2e/api/API-f305c7a02a5e4cc90f5b079515e8d3e0b558ca32/
         cp .env.example .env
         mkdir -p docker/nginx/certs
-        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout docker/nginx/certs/server.key -out docker/nginx/certs/server.crt -subj "/C=FR/ST=IDF/L=Paris/O=Bastivan/OU=IT/CN=localhost"
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+          -keyout docker/nginx/certs/server.key \
+          -out docker/nginx/certs/server.crt \
+          -subj "/C=FR/ST=IDF/L=Paris/O=Bastivan/OU=IT/CN=localhost"
 
     - name: Build and start Docker services
       run: |
+        cd tlc-m2e/api/API-f305c7a02a5e4cc90f5b079515e8d3e0b558ca32/
         docker compose up -d --build
 
     - name: Wait for services to be ready
-      run: |
-        # Wait a bit for MariaDB and App to initialize
-        sleep 15
+      run: sleep 20 # Augmenté car MongoDB/MariaDB peuvent être longs à l'init
 
     - name: Check container status
       run: |
+        cd tlc-m2e/api/API-f305c7a02a5e4cc90f5b079515e8d3e0b558ca32/
         docker compose ps
+        # Affiche les logs en cas d'échec immédiat
+        docker compose logs app
 
     - name: Run a basic test against the API
       run: |
-        # Make a simple curl request to test it's responding (ignoring certs with -k)
-        # Using curl to fetch headers to check for TLC branding and 200/404 response
-        # It's an API, root might be 404, but it should answer through NGINX and PHP.
+        # Test de connexion locale (le port 443 doit être mappé dans docker-compose.yml)
         response=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost/)
         echo "HTTP Response code: $response"
 
-        # If it returns 000, Nginx didn't respond
         if [ "$response" = "000" ]; then
           echo "Failed to connect to Nginx"
+          cd tlc-m2e/api/API-f305c7a02a5e4cc90f5b079515e8d3e0b558ca32/
           docker compose logs
           exit 1
         fi
@@ -53,4 +58,5 @@ jobs:
     - name: Stop Docker services
       if: always()
       run: |
+        cd tlc-m2e/api/API-f305c7a02a5e4cc90f5b079515e8d3e0b558ca32/
         docker compose down
