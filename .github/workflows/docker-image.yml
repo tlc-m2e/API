@@ -1,0 +1,56 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Setup environment
+      run: |
+        cp .env.example .env
+        mkdir -p docker/nginx/certs
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout docker/nginx/certs/server.key -out docker/nginx/certs/server.crt -subj "/C=FR/ST=IDF/L=Paris/O=Bastivan/OU=IT/CN=localhost"
+
+    - name: Build and start Docker services
+      run: |
+        docker compose up -d --build
+
+    - name: Wait for services to be ready
+      run: |
+        # Wait a bit for MariaDB and App to initialize
+        sleep 15
+
+    - name: Check container status
+      run: |
+        docker compose ps
+
+    - name: Run a basic test against the API
+      run: |
+        # Make a simple curl request to test it's responding (ignoring certs with -k)
+        # Using curl to fetch headers to check for TLC branding and 200/404 response
+        # It's an API, root might be 404, but it should answer through NGINX and PHP.
+        response=$(curl -k -s -o /dev/null -w "%{http_code}" https://localhost/)
+        echo "HTTP Response code: $response"
+
+        # If it returns 000, Nginx didn't respond
+        if [ "$response" = "000" ]; then
+          echo "Failed to connect to Nginx"
+          docker compose logs
+          exit 1
+        fi
+
+    - name: Stop Docker services
+      if: always()
+      run: |
+        docker compose down
