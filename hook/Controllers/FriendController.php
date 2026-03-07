@@ -1,10 +1,10 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Friend;
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Models\Workout;
+use TLC\Hook\Models\Friend;
+use TLC\Hook\Models\User;
+use TLC\Hook\Models\Workout;
 
 class FriendController
 {

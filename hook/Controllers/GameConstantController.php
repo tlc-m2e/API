@@ -1,10 +1,10 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\GameConstant;
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Helpers\RedisHelper;
+use TLC\Hook\Models\GameConstant;
+use TLC\Hook\Models\User;
+use TLC\Hook\Helpers\RedisHelper;
 use MongoDB\BSON\ObjectId;
 
 class GameConstantController

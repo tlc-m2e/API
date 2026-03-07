@@ -1,14 +1,14 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Listing;
-use Bastivan\UniversalApi\Hook\Models\Sale;
-use Bastivan\UniversalApi\Hook\Models\Duck;
-use Bastivan\UniversalApi\Hook\Models\Egg;
-use Bastivan\UniversalApi\Hook\Models\SpendingWallet;
-use Bastivan\UniversalApi\Hook\Middleware\AuthMiddleware;
-use Bastivan\UniversalApi\Hook\Helpers\RedisHelper;
+use TLC\Hook\Models\Listing;
+use TLC\Hook\Models\Sale;
+use TLC\Hook\Models\Duck;
+use TLC\Hook\Models\Egg;
+use TLC\Hook\Models\SpendingWallet;
+use TLC\Hook\Middleware\AuthMiddleware;
+use TLC\Hook\Helpers\RedisHelper;
 use MongoDB\BSON\ObjectId;
 
 class ListingController
@@ -133,7 +133,7 @@ class ListingController
         ]);
 
         // Discord Webhook Notification
-        $webhookUrl = $_ENV['DISCORD_WEBHOOK_URL'] ?? \Bastivan\UniversalApi\Core\Config::get('DISCORD_WEBHOOK_URL');
+        $webhookUrl = $_ENV['DISCORD_WEBHOOK_URL'] ?? \TLC\Core\Config::get('DISCORD_WEBHOOK_URL');
         if (!empty($webhookUrl)) {
             $message = [
                 'content' => "🦆 **Nouveau Duck sur la Marketplace!** 🦆\nUn nouveau Duck a été mis en vente pour **{$data['price']} {$data['currency']}** !",

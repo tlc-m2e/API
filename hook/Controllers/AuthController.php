@@ -1,10 +1,10 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Services\JwtService;
-use Bastivan\UniversalApi\Hook\Services\MailService;
+use TLC\Hook\Models\User;
+use TLC\Hook\Services\JwtService;
+use TLC\Hook\Services\MailService;
 
 class AuthController
 {

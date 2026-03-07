@@ -1,10 +1,10 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Models\BaseModel; // Assuming Wallet is simple or we use BaseModel directly
-use Bastivan\UniversalApi\Hook\Models\SpendingWallet;
+use TLC\Hook\Models\User;
+use TLC\Hook\Models\BaseModel; // Assuming Wallet is simple or we use BaseModel directly
+use TLC\Hook\Models\SpendingWallet;
 use MongoDB\BSON\ObjectId;
 
 class WalletController

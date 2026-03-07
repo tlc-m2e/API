@@ -1,8 +1,8 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Collection;
+use TLC\Hook\Models\Collection;
 
 class CollectionController
 {

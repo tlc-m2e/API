@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core;
+namespace TLC\Core;
 
 use PDO;
 use PDOException;
@@ -10,7 +10,7 @@ use MongoDB\Client as MongoClient;
 
 /**
  * Class Database
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * A Singleton Wrapper supporting PDO (MySQL/PostgreSQL) and MongoDB.
  * Enforces usage of prepared statements for SQL.
@@ -41,7 +41,7 @@ class Database
     private function connectMongoDB($host, $port, $database, $username, $password): void
     {
         if (!class_exists(MongoClient::class)) {
-            throw new \RuntimeException("Bastivan Consulting API - MongoDB Driver not installed. Please run 'composer require mongodb/mongodb'.");
+            throw new \RuntimeException("THE LIFE COINCOIN API - MongoDB Driver not installed. Please run 'composer require mongodb/mongodb'.");
         }
 
         try {
@@ -63,7 +63,7 @@ class Database
 
             // Note: MongoDB lazy connects, so we might not see an error immediately until a command is run.
         } catch (\Exception $e) {
-             throw new \RuntimeException("Bastivan Consulting API - MongoDB Connection Error: " . $e->getMessage());
+             throw new \RuntimeException("THE LIFE COINCOIN API - MongoDB Connection Error: " . $e->getMessage());
         }
     }
 
@@ -83,7 +83,7 @@ class Database
         try {
             $this->connection = new PDO($dsn, $username, $password, $options);
         } catch (PDOException $e) {
-            throw new \RuntimeException("Bastivan Consulting API - Database Connection Error: " . $e->getMessage());
+            throw new \RuntimeException("THE LIFE COINCOIN API - Database Connection Error: " . $e->getMessage());
         }
     }
 
@@ -116,7 +116,7 @@ class Database
     public function query(string $sql, array $params = []): \PDOStatement
     {
         if ($this->connection instanceof MongoClient) {
-            throw new \RuntimeException("Bastivan Consulting API - method 'query' is not supported for MongoDB. Use the MongoClient instance directly.");
+            throw new \RuntimeException("THE LIFE COINCOIN API - method 'query' is not supported for MongoDB. Use the MongoClient instance directly.");
         }
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);

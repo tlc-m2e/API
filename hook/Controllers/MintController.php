@@ -1,16 +1,16 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Models\SpendingWallet;
-use Bastivan\UniversalApi\Hook\Models\Duck;
-use Bastivan\UniversalApi\Hook\Models\Mint;
-use Bastivan\UniversalApi\Hook\Models\Egg;
-use Bastivan\UniversalApi\Hook\Models\GameConstant;
-use Bastivan\UniversalApi\Hook\Models\DuckSpending;
-use Bastivan\UniversalApi\Hook\Models\EggSpending;
-use Bastivan\UniversalApi\Hook\Helpers\MintHelper;
+use TLC\Hook\Models\User;
+use TLC\Hook\Models\SpendingWallet;
+use TLC\Hook\Models\Duck;
+use TLC\Hook\Models\Mint;
+use TLC\Hook\Models\Egg;
+use TLC\Hook\Models\GameConstant;
+use TLC\Hook\Models\DuckSpending;
+use TLC\Hook\Models\EggSpending;
+use TLC\Hook\Helpers\MintHelper;
 
 class MintController
 {

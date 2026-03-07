@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core\Queue;
+namespace TLC\Core\Queue;
 
 /**
  * Class Job
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Abstract base class for all queue jobs.
  */

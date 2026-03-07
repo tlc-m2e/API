@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core;
-use Bastivan\UniversalApi\Controllers\ErrorController;
+namespace TLC\Core;
+use TLC\Controllers\ErrorController;
 
 /**
  * Class Debugger
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Collects comprehensive debug information.
  */
@@ -25,7 +25,7 @@ class Debugger
         //$bodySize = strlen((string)file_get_contents('php://input'));
 
         return [
-            'bastivan_debug' => [
+            'tlc_debug' => [
                 'client_ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
                 'client_os' => self::getOS($_SERVER['HTTP_USER_AGENT'] ?? ''),
                 'request_size_bytes' => $bodySize,
@@ -69,7 +69,7 @@ class Debugger
             // However, we can convert errors to exceptions to handle them uniformly if desired.
             // For now, we log and store for debug output, but don't stop execution unless we want strict mode.
 
-            $GLOBALS['BASTIVAN_DEBUG_ERRORS'][] = $errorData;
+            $GLOBALS['TLC_DEBUG_ERRORS'][] = $errorData;
 
             // Don't execute PHP internal error handler
             return true;

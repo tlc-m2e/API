@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Hook\Helpers;
+namespace TLC\Hook\Helpers;
 
 use Predis\Client;
 

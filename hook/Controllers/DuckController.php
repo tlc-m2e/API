@@ -1,10 +1,10 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Duck;
-use Bastivan\UniversalApi\Hook\Core\Mongo;
-use Bastivan\UniversalApi\Hook\Helpers\RedisHelper;
+use TLC\Hook\Models\Duck;
+use TLC\Hook\Core\Mongo;
+use TLC\Hook\Helpers\RedisHelper;
 use MongoDB\BSON\ObjectId;
 
 class DuckController

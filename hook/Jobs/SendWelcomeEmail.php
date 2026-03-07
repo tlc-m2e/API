@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Hook\Jobs;
+namespace TLC\Hook\Jobs;
 
-use Bastivan\UniversalApi\Core\Queue\Job;
-use Bastivan\UniversalApi\Core\Logger;
+use TLC\Core\Queue\Job;
+use TLC\Core\Logger;
 
 /**
  * Class SendWelcomeEmail
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Example job to send a welcome email.
  */

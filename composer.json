@@ -1,12 +1,12 @@
 {
-    "name": "bastivan-consulting/universal-api",
-    "description": "Fondations d'une API universelle en PHP 8.4 par Bastivan Consulting",
+    "name": "tlc/api",
+    "description": "Fondations de l'API THE LIFE COINCOIN (TLC) en PHP 8.4",
     "type": "project",
     "license": "proprietary",
     "authors": [
         {
-            "name": "Bastivan Consulting",
-            "email": "dev@bastivan.consulting"
+            "name": "THE LIFE COINCOIN",
+            "email": "contact@thelifecoincoin.com"
         }
     ],
     "require": {
@@ -25,8 +25,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Bastivan\\UniversalApi\\": "src/",
-            "Bastivan\\UniversalApi\\Hook\\": "hook/"
+            "TLC\\": "src/",
+            "TLC\\Hook\\": "hook/"
         }
     },
     "config": {

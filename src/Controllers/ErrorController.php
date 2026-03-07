@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Controllers;
+namespace TLC\Controllers;
 
-use Bastivan\UniversalApi\Core\Config;
+use TLC\Core\Config;
 
 /**
  * Class ErrorController
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Handles rendering of error pages.
  */

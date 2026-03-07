@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core\Middleware;
+namespace TLC\Core\Middleware;
 
-use Bastivan\UniversalApi\Core\Config;
+use TLC\Core\Config;
 
 /**
  * Class CorsMiddleware
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Handles Cross-Origin Resource Sharing (CORS) headers and Preflight requests.
  */

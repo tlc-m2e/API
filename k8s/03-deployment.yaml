@@ -4,7 +4,7 @@ metadata:
   name: tlc
   labels:
     app: tlc
-    vendor: bastivan-consulting
+    vendor: tlc
 spec:
   replicas: 1
   selector:
@@ -18,7 +18,7 @@ spec:
       # InitContainer pour copier le code vers le volume partagé afin que Nginx puisse le servir
       initContainers:
       - name: init-code
-        image: bastivan-consulting/tlc-app:latest
+        image: tlc/tlc-app:latest
         imagePullPolicy: IfNotPresent
         command: ["sh", "-c", "cp -r /var/www/html/. /shared-code/"]
         volumeMounts:
@@ -28,7 +28,7 @@ spec:
       containers:
       # Application PHP-FPM
       - name: app
-        image: bastivan-consulting/tlc-app:latest
+        image: tlc/tlc-app:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9000

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core\Middleware;
+namespace TLC\Core\Middleware;
 
-use Bastivan\UniversalApi\Core\Cache;
-use Bastivan\UniversalApi\Core\Config;
+use TLC\Core\Cache;
+use TLC\Core\Config;
 
 /**
  * Class RateLimitMiddleware
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Simple Redis-based Rate Limiter.
  */
@@ -36,7 +36,7 @@ class RateLimitMiddleware
             header('Retry-After: ' . $window);
             echo json_encode([
                 'error' => 'Too Many Requests',
-                'message' => 'Bastivan Consulting API: Rate limit exceeded.'
+                'message' => 'THE LIFE COINCOIN API: Rate limit exceeded.'
             ]);
             exit;
         }

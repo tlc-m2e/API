@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core;
-use Bastivan\UniversalApi\Controllers\ErrorController;
+namespace TLC\Core;
+use TLC\Controllers\ErrorController;
 
 /**
  * Class Router
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Simple Regex Router.
  */

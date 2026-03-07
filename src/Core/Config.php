@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core;
+namespace TLC\Core;
 
 use Aws\S3\S3Client;
 use Dotenv\Dotenv;
 
 /**
  * Class Config
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Handles configuration loading from .env (Local) or S3 (HA).
  */
@@ -59,7 +59,7 @@ class Config
         } catch (\Exception $e) {
             // Fallback to local config or log error
             // In a real scenario, we might want to halt or warn
-            error_log("Bastivan Consulting API: Failed to load config from S3: " . $e->getMessage());
+            error_log("THE LIFE COINCOIN API: Failed to load config from S3: " . $e->getMessage());
         }
     }
 

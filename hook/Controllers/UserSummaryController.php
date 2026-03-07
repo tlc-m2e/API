@@ -1,9 +1,9 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Models\BaseModel;
+use TLC\Hook\Models\User;
+use TLC\Hook\Models\BaseModel;
 use MongoDB\BSON\ObjectId;
 
 class UserSummaryController

@@ -2,7 +2,7 @@
 
 Bienvenue sur l'API officielle de **THE LIFE COINCOIN**, une application "Move-to-Earn" gamifiée intégrée, clé en main pour que n'importe qui puisse créer son M2E.
 
-Cette API est propulsée par le framework **Universal API** de Bastivan Consulting et modifiée par **Vibe coder**, garantissant performance, sécurité et scalabilité. Le principe est simple : courir et gagner de l'argent !
+Cette API est propulsée par le framework **Universal API** de THE LIFE COINCOIN et modifiée par **Vibe coder**, garantissant performance, sécurité et scalabilité. Le principe est simple : courir et gagner de l'argent !
 
 ---
 
@@ -182,4 +182,4 @@ Le projet repose sur une architecture **MVC Custom** située dans le dossier `ho
 
 Développé pour **THE LIFE COINCOIN**. Open Source M2E.
 Créé par **Vibe coder**.
-Basé sur le framework *Universal API* de **Bastivan Consulting**.
+Basé sur le framework *Universal API* de **THE LIFE COINCOIN**.

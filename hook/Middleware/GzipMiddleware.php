@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Hook\Middleware;
+namespace TLC\Hook\Middleware;
 
 class GzipMiddleware
 {

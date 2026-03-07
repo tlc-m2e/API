@@ -1,9 +1,9 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Helpers\UserSettingHelper;
-use Bastivan\UniversalApi\Hook\Models\UserSetting;
+use TLC\Hook\Helpers\UserSettingHelper;
+use TLC\Hook\Models\UserSetting;
 use MongoDB\BSON\ObjectId;
 
 class UserSettingController

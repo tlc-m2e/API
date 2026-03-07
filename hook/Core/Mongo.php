@@ -1,8 +1,8 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Core;
+namespace TLC\Hook\Core;
 
-use Bastivan\UniversalApi\Core\Config;
+use TLC\Core\Config;
 use MongoDB\Client;
 use MongoDB\Collection;
 

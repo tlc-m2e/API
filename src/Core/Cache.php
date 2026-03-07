@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core;
+namespace TLC\Core;
 
 use Predis\Client;
 
 /**
  * Class Cache
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Redis Cache Wrapper.
  */

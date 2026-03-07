@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core;
+namespace TLC\Core;
 
 use Monolog\Logger as MonoLogger;
 use Monolog\Handler\StreamHandler;
@@ -10,7 +10,7 @@ use Aws\S3\S3Client;
 
 /**
  * Class Logger
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  */
 class Logger
 {
@@ -19,7 +19,7 @@ class Logger
     public static function init(): void
     {
         if (self::$logger === null) {
-            self::$logger = new MonoLogger('bastivan_api');
+            self::$logger = new MonoLogger('tlc_api');
 
             $logDriver = Config::get('LOG_DRIVER', 'local');
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Services\JwtService;
-use Bastivan\UniversalApi\Hook\Middleware\AuthMiddleware;
+use TLC\Hook\Models\User;
+use TLC\Hook\Services\JwtService;
+use TLC\Hook\Middleware\AuthMiddleware;
 use RobThree\Auth\TwoFactorAuth;
 use MongoDB\BSON\ObjectId;
 
@@ -18,7 +18,7 @@ class UserController
     {
         $this->userModel = new User();
         $this->jwtService = new JwtService();
-        $this->tfa = new TwoFactorAuth(issuer: 'Bastivan'); // Issuer name
+        $this->tfa = new TwoFactorAuth(issuer: 'TLC'); // Issuer name
     }
 
     private function getCurrentUser()
@@ -382,11 +382,11 @@ class UserController
         }
 
         // Fetch ducks
-        $duckModel = new \Bastivan\UniversalApi\Hook\Models\Duck();
+        $duckModel = new \TLC\Hook\Models\Duck();
         $ducks = $duckModel->find(['owner_id' => (string)$user['_id']]);
 
         // Fetch workout stats (e.g. total distance)
-        $workoutModel = new \Bastivan\UniversalApi\Hook\Models\Workout();
+        $workoutModel = new \TLC\Hook\Models\Workout();
         $workouts = $workoutModel->find(['user_id' => (string)$user['_id']]);
 
         $totalDistance = 0;

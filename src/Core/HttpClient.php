@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core;
+namespace TLC\Core;
 
 use Exception;
 
 /**
  * Class HttpClient
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Un wrapper autour de cURL pour standardiser les appels sortants,
  * gérer les timeouts et les retries, et faciliter les logs.

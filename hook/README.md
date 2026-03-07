@@ -59,4 +59,4 @@ Pour des implémentations plus robustes, référez-vous aux fichiers dans `docs/
 
 ---
 
-**Bastivan Consulting** - L'excellence par le code.
+**THE LIFE COINCOIN** - L'excellence par le code.

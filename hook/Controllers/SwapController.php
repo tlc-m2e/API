@@ -1,10 +1,10 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Swap;
-use Bastivan\UniversalApi\Hook\Models\SpendingWallet;
-use Bastivan\UniversalApi\Hook\Middleware\AuthMiddleware;
+use TLC\Hook\Models\Swap;
+use TLC\Hook\Models\SpendingWallet;
+use TLC\Hook\Middleware\AuthMiddleware;
 use MongoDB\BSON\ObjectId;
 
 class SwapController
@@ -26,7 +26,7 @@ class SwapController
             echo json_encode(['error' => 'Unauthorized']);
             exit;
         }
-        $userModel = new \Bastivan\UniversalApi\Hook\Models\User();
+        $userModel = new \TLC\Hook\Models\User();
         $user = $userModel->findById($userId);
         if (!$user) {
             http_response_code(404);

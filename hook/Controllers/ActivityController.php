@@ -1,9 +1,9 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Activity;
-use Bastivan\UniversalApi\Hook\Models\SpendingWallet;
+use TLC\Hook\Models\Activity;
+use TLC\Hook\Models\SpendingWallet;
 use MongoDB\BSON\ObjectId;
 
 class ActivityController

@@ -1,6 +1,6 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Helpers;
+namespace TLC\Hook\Helpers;
 
 class MintHelper
 {

@@ -1,20 +1,20 @@
 <?php
 
-use Bastivan\UniversalApi\Hook\Controllers\AuthController;
-use Bastivan\UniversalApi\Hook\Controllers\DuckController;
-use Bastivan\UniversalApi\Hook\Controllers\EncryptionController;
-use Bastivan\UniversalApi\Hook\Controllers\FriendController;
-use Bastivan\UniversalApi\Hook\Controllers\LevelUpController;
-use Bastivan\UniversalApi\Hook\Controllers\ListingController;
-use Bastivan\UniversalApi\Hook\Controllers\CollectionController;
-use Bastivan\UniversalApi\Hook\Controllers\EggController;
-use Bastivan\UniversalApi\Hook\Controllers\MarketplaceController;
-use Bastivan\UniversalApi\Hook\Controllers\NotificationController;
-use Bastivan\UniversalApi\Hook\Controllers\UserController;
-use Bastivan\UniversalApi\Hook\Controllers\UserSummaryController;
-use Bastivan\UniversalApi\Hook\Controllers\WalletController;
-use Bastivan\UniversalApi\Hook\Controllers\WorkoutController;
-use Bastivan\UniversalApi\Hook\Middleware\AuthMiddleware;
+use TLC\Hook\Controllers\AuthController;
+use TLC\Hook\Controllers\DuckController;
+use TLC\Hook\Controllers\EncryptionController;
+use TLC\Hook\Controllers\FriendController;
+use TLC\Hook\Controllers\LevelUpController;
+use TLC\Hook\Controllers\ListingController;
+use TLC\Hook\Controllers\CollectionController;
+use TLC\Hook\Controllers\EggController;
+use TLC\Hook\Controllers\MarketplaceController;
+use TLC\Hook\Controllers\NotificationController;
+use TLC\Hook\Controllers\UserController;
+use TLC\Hook\Controllers\UserSummaryController;
+use TLC\Hook\Controllers\WalletController;
+use TLC\Hook\Controllers\WorkoutController;
+use TLC\Hook\Middleware\AuthMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,7 +30,7 @@ $router->get('/api/ping', function() {
     echo json_encode(['status' => 'pong', 'timestamp' => time()]);
 });
 
-$router->get('/api/custom', [\Bastivan\UniversalApi\Hook\Controllers\CustomController::class, 'index']);
+$router->get('/api/custom', [\TLC\Hook\Controllers\CustomController::class, 'index']);
 
 // Auth Routes (and Legacy /api/auth)
 $router->post('/api/auth/register', [AuthController::class, 'register']);
@@ -44,9 +44,9 @@ $router->get('/api/user/me', [AuthController::class, 'me'], [
 ]);
 
 // User Settings
-$router->get('/api/userSettings/?', [\Bastivan\UniversalApi\Hook\Controllers\UserSettingController::class, 'getAllSettings'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/userSettings/([^/]+)/?', [\Bastivan\UniversalApi\Hook\Controllers\UserSettingController::class, 'getSetting'], ['middleware' => [AuthMiddleware::class]]);
-$router->put('/api/userSettings/([^/]+)/?', [\Bastivan\UniversalApi\Hook\Controllers\UserSettingController::class, 'updateSetting'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/userSettings/?', [\TLC\Hook\Controllers\UserSettingController::class, 'getAllSettings'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/userSettings/([^/]+)/?', [\TLC\Hook\Controllers\UserSettingController::class, 'getSetting'], ['middleware' => [AuthMiddleware::class]]);
+$router->put('/api/userSettings/([^/]+)/?', [\TLC\Hook\Controllers\UserSettingController::class, 'updateSetting'], ['middleware' => [AuthMiddleware::class]]);
 
 $router->post('/api/users/2faEnabled', [UserController::class, 'twoFactorEnabled']); // Public
 $router->post('/api/users/loginWithOtp', [AuthController::class, 'loginWithOtp']); // Public
@@ -162,31 +162,31 @@ $router->post('/api/marketplace/listing/buy/([a-f0-9]{24})', [ListingController:
 $router->delete('/api/marketplace/listing/([a-f0-9]{24})', [ListingController::class, 'delete'], ['middleware' => [AuthMiddleware::class]]);
 
 // Spending Wallet Routes (Unified)
-$router->get('/api/spending/getTickets', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'getTickets'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/spending/getBalance', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'getBalance'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/spending/duckTeam', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'duckTeam'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/spending/stats', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'stats'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/spending/admin/burnWallet', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'burnWallet'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/spending/admin', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'listWallets'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/spending/admin/getBalance/([a-f0-9]{24})', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'getWalletBalance'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/spending/admin/setMaxEndurance/([a-f0-9]{24})', [\Bastivan\UniversalApi\Hook\Controllers\SpendingWalletController::class, 'setMaxEndurance'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/getTickets', [\TLC\Hook\Controllers\SpendingWalletController::class, 'getTickets'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/getBalance', [\TLC\Hook\Controllers\SpendingWalletController::class, 'getBalance'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/duckTeam', [\TLC\Hook\Controllers\SpendingWalletController::class, 'duckTeam'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/stats', [\TLC\Hook\Controllers\SpendingWalletController::class, 'stats'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/spending/admin/burnWallet', [\TLC\Hook\Controllers\SpendingWalletController::class, 'burnWallet'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/admin', [\TLC\Hook\Controllers\SpendingWalletController::class, 'listWallets'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/spending/admin/getBalance/([a-f0-9]{24})', [\TLC\Hook\Controllers\SpendingWalletController::class, 'getWalletBalance'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/spending/admin/setMaxEndurance/([a-f0-9]{24})', [\TLC\Hook\Controllers\SpendingWalletController::class, 'setMaxEndurance'], ['middleware' => [AuthMiddleware::class]]);
 
 // Energy Routes
 // Activity Routes
-$router->get('/api/activity/?', [\Bastivan\UniversalApi\Hook\Controllers\ActivityController::class, 'index'], [
+$router->get('/api/activity/?', [\TLC\Hook\Controllers\ActivityController::class, 'index'], [
     'middleware' => [AuthMiddleware::class]
 ]);
 
-$router->get('/api/energy', [\Bastivan\UniversalApi\Hook\Controllers\EnergyController::class, 'getEnergy'], [
+$router->get('/api/energy', [\TLC\Hook\Controllers\EnergyController::class, 'getEnergy'], [
     'middleware' => [AuthMiddleware::class]
 ]);
-$router->post('/api/energy/refill', [\Bastivan\UniversalApi\Hook\Controllers\EnergyController::class, 'refill'], [
+$router->post('/api/energy/refill', [\TLC\Hook\Controllers\EnergyController::class, 'refill'], [
     'middleware' => [AuthMiddleware::class]
 ]);
-$router->post('/api/energy/forceRecomputeMaximumEnergyForSpending', [\Bastivan\UniversalApi\Hook\Controllers\EnergyController::class, 'forceRecomputeMaximumEnergyForSpending'], [
+$router->post('/api/energy/forceRecomputeMaximumEnergyForSpending', [\TLC\Hook\Controllers\EnergyController::class, 'forceRecomputeMaximumEnergyForSpending'], [
     'middleware' => [AuthMiddleware::class] 
 ]);
-$router->get('/api/stats/entity/([a-zA-Z0-9_]+)', [\Bastivan\UniversalApi\Hook\Controllers\StatsController::class, 'getEntityStats']);
+$router->get('/api/stats/entity/([a-zA-Z0-9_]+)', [\TLC\Hook\Controllers\StatsController::class, 'getEntityStats']);
 
 // Workout Routes (Unified)
 $router->post('/api/workout/calculateUsersSummary', [WorkoutController::class, 'calculateUsersSummary'], ['middleware' => [AuthMiddleware::class]]);
@@ -204,32 +204,32 @@ $router->get('/api/workout/([a-f0-9]{24})/ai-analysis', [WorkoutController::clas
 $router->post('/api/workout/recomputeFinalStats/([a-f0-9]{24})', [WorkoutController::class, 'recomputeFinalStats'], ['middleware' => [AuthMiddleware::class]]);
 
 // Transfer Attempt Routes
-$router->post('/api/transfers/attempt/init', [\Bastivan\UniversalApi\Hook\Controllers\TransferAttemptController::class, 'init'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/transfers/attempt/?', [\Bastivan\UniversalApi\Hook\Controllers\TransferAttemptController::class, 'list'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/transfers/attempt/check/([^/]+)', [\Bastivan\UniversalApi\Hook\Controllers\TransferAttemptController::class, 'check'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/transfers/attempt/removeDuplicatesTokensIdNfts', [\Bastivan\UniversalApi\Hook\Controllers\TransferAttemptController::class, 'removeDuplicatesTokensIdNfts'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/transfers/attempt/init', [\TLC\Hook\Controllers\TransferAttemptController::class, 'init'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/transfers/attempt/?', [\TLC\Hook\Controllers\TransferAttemptController::class, 'list'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/transfers/attempt/check/([^/]+)', [\TLC\Hook\Controllers\TransferAttemptController::class, 'check'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/transfers/attempt/removeDuplicatesTokensIdNfts', [\TLC\Hook\Controllers\TransferAttemptController::class, 'removeDuplicatesTokensIdNfts'], ['middleware' => [AuthMiddleware::class]]);
 
 // Swap Routes
-$router->post('/api/transfers/swap/mintCat', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'mintCat'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/transfers/swap/poolClaim/([^/]+)/([^/]+)', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'poolClaim'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/transfers/swap/pool/([^/]+)/([^/]+)/?([^/]*)/?([^/]*)', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'getPoolDetails'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/transfers/swap/get/([^/]+)', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'getSwap'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/transfers/swap/', [\Bastivan\UniversalApi\Hook\Controllers\SwapController::class, 'swap'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/transfers/swap/mintCat', [\TLC\Hook\Controllers\SwapController::class, 'mintCat'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/transfers/swap/poolClaim/([^/]+)/([^/]+)', [\TLC\Hook\Controllers\SwapController::class, 'poolClaim'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/transfers/swap/pool/([^/]+)/([^/]+)/?([^/]*)/?([^/]*)', [\TLC\Hook\Controllers\SwapController::class, 'getPoolDetails'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/transfers/swap/get/([^/]+)', [\TLC\Hook\Controllers\SwapController::class, 'getSwap'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/transfers/swap/', [\TLC\Hook\Controllers\SwapController::class, 'swap'], ['middleware' => [AuthMiddleware::class]]);
 
 // Game Constants Routes
-$router->get('/api/gameConstants/?', [\Bastivan\UniversalApi\Hook\Controllers\GameConstantController::class, 'list'], [
+$router->get('/api/gameConstants/?', [\TLC\Hook\Controllers\GameConstantController::class, 'list'], [
     'middleware' => [AuthMiddleware::class]
 ]);
-$router->get('/api/gameConstants/public/?', [\Bastivan\UniversalApi\Hook\Controllers\GameConstantController::class, 'listPublic']);
-$router->post('/api/gameConstants/public/([^/]+)', [\Bastivan\UniversalApi\Hook\Controllers\GameConstantController::class, 'getPublicByKey']);
-$router->put('/api/gameConstants/([a-f0-9]{24})', [\Bastivan\UniversalApi\Hook\Controllers\GameConstantController::class, 'update'], [
+$router->get('/api/gameConstants/public/?', [\TLC\Hook\Controllers\GameConstantController::class, 'listPublic']);
+$router->post('/api/gameConstants/public/([^/]+)', [\TLC\Hook\Controllers\GameConstantController::class, 'getPublicByKey']);
+$router->put('/api/gameConstants/([a-f0-9]{24})', [\TLC\Hook\Controllers\GameConstantController::class, 'update'], [
     'middleware' => [AuthMiddleware::class]
 ]);
 
 // --- SwarmGen Mint Routes ---
-$router->get('/api/swarmGen/mint/?', [\Bastivan\UniversalApi\Hook\Controllers\MintController::class, 'mintRules'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/swarmGen/mint/([a-f0-9]{24})/([a-f0-9]{24})', [\Bastivan\UniversalApi\Hook\Controllers\MintController::class, 'mint'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/swarmGen/mint', [\Bastivan\UniversalApi\Hook\Controllers\MintController::class, 'executeMint'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/mint/?', [\TLC\Hook\Controllers\MintController::class, 'mintRules'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/mint/([a-f0-9]{24})/([a-f0-9]{24})', [\TLC\Hook\Controllers\MintController::class, 'mint'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/mint', [\TLC\Hook\Controllers\MintController::class, 'executeMint'], ['middleware' => [AuthMiddleware::class]]);
 
 // --- SwarmGen Level Up Routes ---
 $router->post('/api/swarmGen/levelUp/duck/([a-f0-9]{24})', [LevelUpController::class, 'levelUp'], ['middleware' => [AuthMiddleware::class]]);

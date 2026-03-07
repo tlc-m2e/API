@@ -2,17 +2,17 @@
 
 /**
  * Universal API Entry Point
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  */
 
-use Bastivan\UniversalApi\Core\Bootstrap;
-use Bastivan\UniversalApi\Core\Router;
-use Bastivan\UniversalApi\Core\Debugger;
-use Bastivan\UniversalApi\Core\Middleware\SecurityMiddleware;
-use Bastivan\UniversalApi\Core\Middleware\CorsMiddleware;
-use Bastivan\UniversalApi\Core\Middleware\BrandingMiddleware;
-use Bastivan\UniversalApi\Core\Middleware\GzipMiddleware;
-use Bastivan\UniversalApi\Controllers\HomeController;
+use TLC\Core\Bootstrap;
+use TLC\Core\Router;
+use TLC\Core\Debugger;
+use TLC\Core\Middleware\SecurityMiddleware;
+use TLC\Core\Middleware\CorsMiddleware;
+use TLC\Core\Middleware\BrandingMiddleware;
+use TLC\Core\Middleware\GzipMiddleware;
+use TLC\Controllers\HomeController;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -32,15 +32,15 @@ GzipMiddleware::handle();
 $router = new Router();
 
 // Register Router in Container
-Bastivan\UniversalApi\Core\Container::getInstance()->instance(Router::class, $router);
+TLC\Core\Container::getInstance()->instance(Router::class, $router);
 
 $router->get('/', [HomeController::class, 'index']);
 $router->get('/status', [HomeController::class, 'status']);
 
 // Documentation Routes (Registered conditionally inside Controller but route must exist to be dispatched)
 // We register them globally, logic inside controller handles the check.
-$router->get('/docs', [Bastivan\UniversalApi\Controllers\DocsController::class, 'index']);
-$router->get('/docs/schema', [Bastivan\UniversalApi\Controllers\DocsController::class, 'schema']);
+$router->get('/docs', [TLC\Controllers\DocsController::class, 'index']);
+$router->get('/docs/schema', [TLC\Controllers\DocsController::class, 'schema']);
 
 // Load Custom Hooks
 $hookBootstrap = __DIR__ . '/../hook/bootstrap.php';
@@ -48,7 +48,7 @@ if (file_exists($hookBootstrap)) {
     try {
         require_once $hookBootstrap;
     } catch (\Throwable $e) {
-        \Bastivan\UniversalApi\Core\Logger::error("Hook Bootstrap Failed: " . $e->getMessage());
+        \TLC\Core\Logger::error("Hook Bootstrap Failed: " . $e->getMessage());
         // We continue execution, allowing Core to run even if Hooks fail
     }
 }

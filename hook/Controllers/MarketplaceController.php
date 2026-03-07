@@ -1,10 +1,10 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Listing;
-use Bastivan\UniversalApi\Hook\Models\Pot;
-use Bastivan\UniversalApi\Hook\Models\Sale;
+use TLC\Hook\Models\Listing;
+use TLC\Hook\Models\Pot;
+use TLC\Hook\Models\Sale;
 use MongoDB\BSON\ObjectId;
 
 class MarketplaceController
