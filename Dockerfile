@@ -1,8 +1,8 @@
-# Dockerfile developed by Bastivan Consulting
+# Dockerfile developed by THE LIFE COINCOIN
 FROM php:8.4-fpm-alpine
 
 # Branding and Metadata
-LABEL maintainer="Bastivan Consulting"
+LABEL maintainer="THE LIFE COINCOIN"
 LABEL description="Universal API Foundation - PHP FPM Service"
 
 # Install Dependencies

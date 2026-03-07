@@ -1,11 +1,11 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Workout;
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Helpers\RedisHelper;
-use Bastivan\UniversalApi\Hook\Services\AIService;
+use TLC\Hook\Models\Workout;
+use TLC\Hook\Models\User;
+use TLC\Hook\Helpers\RedisHelper;
+use TLC\Hook\Services\AIService;
 use MongoDB\BSON\ObjectId;
 
 class WorkoutController

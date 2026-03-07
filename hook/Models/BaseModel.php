@@ -1,8 +1,8 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Models;
+namespace TLC\Hook\Models;
 
-use Bastivan\UniversalApi\Hook\Core\Mongo;
+use TLC\Hook\Core\Mongo;
 use MongoDB\BSON\ObjectId;
 use MongoDB\Collection;
 

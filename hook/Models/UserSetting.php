@@ -1,6 +1,6 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Models;
+namespace TLC\Hook\Models;
 
 class UserSetting extends BaseModel
 {

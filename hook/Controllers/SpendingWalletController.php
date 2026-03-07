@@ -1,12 +1,12 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\SpendingWallet;
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Models\Duck;
-use Bastivan\UniversalApi\Hook\Models\Egg;
-use Bastivan\UniversalApi\Hook\Helpers\RedisHelper;
+use TLC\Hook\Models\SpendingWallet;
+use TLC\Hook\Models\User;
+use TLC\Hook\Models\Duck;
+use TLC\Hook\Models\Egg;
+use TLC\Hook\Helpers\RedisHelper;
 use MongoDB\BSON\ObjectId;
 
 class SpendingWalletController

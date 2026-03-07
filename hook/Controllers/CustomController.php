@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
 class CustomController
 {

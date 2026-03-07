@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Controllers;
+namespace TLC\Controllers;
 
-use Bastivan\UniversalApi\Core\Config;
-use Bastivan\UniversalApi\Core\Docs\OpenApiGenerator;
-use Bastivan\UniversalApi\Core\Router;
+use TLC\Core\Config;
+use TLC\Core\Docs\OpenApiGenerator;
+use TLC\Core\Router;
 
 /**
  * Class DocsController
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Handles API documentation routes.
  */
@@ -36,7 +36,7 @@ class DocsController
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>API Documentation - Bastivan Consulting</title>
+    <title>API Documentation - THE LIFE COINCOIN</title>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.css" />
     <link rel="icon" type="image/png" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/favicon-32x32.png" sizes="32x32" />
     <style>

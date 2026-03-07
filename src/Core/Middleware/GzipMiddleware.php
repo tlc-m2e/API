@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core\Middleware;
+namespace TLC\Core\Middleware;
 
 /**
  * Class GzipMiddleware
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Handles response compression.
  */

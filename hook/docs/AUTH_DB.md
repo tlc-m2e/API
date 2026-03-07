@@ -88,9 +88,9 @@ Le middleware intercepte chaque requête, vérifie la signature du JWT et peuple
 **Fichier : `hook/Middleware/AuthMiddleware.php`**
 
 ```php
-namespace Bastivan\UniversalApi\Hook\Middleware;
+namespace TLC\Hook\Middleware;
 
-use Bastivan\UniversalApi\Hook\Services\JwtService;
+use TLC\Hook\Services\JwtService;
 
 class AuthMiddleware
 {

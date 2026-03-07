@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core\Docs;
+namespace TLC\Core\Docs;
 
-use Bastivan\UniversalApi\Core\Router;
-use Bastivan\UniversalApi\Core\Config;
+use TLC\Core\Router;
+use TLC\Core\Config;
 use ReflectionClass;
 use ReflectionMethod;
 
 /**
  * Class OpenApiGenerator
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Generates OpenAPI 3.0 specification from registered routes.
  */
@@ -47,8 +47,8 @@ class OpenApiGenerator
                 'version' => Config::get('APP_VERSION', '1.0.0'),
                 'description' => 'Documentation générée automatiquement.',
                 'contact' => [
-                    'name' => 'Bastivan Consulting',
-                    'email' => 'dev@bastivan.consulting'
+                    'name' => 'THE LIFE COINCOIN',
+                    'email' => 'contact@thelifecoincoin.com'
                 ]
             ],
             'servers' => [

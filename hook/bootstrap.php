@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 /**
  * Hook System Bootstrap
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  */
 
 // 1. Register Autoloader for Hooks
 spl_autoload_register(function ($class) {
-    $prefix = 'Bastivan\\UniversalApi\\Hook\\';
+    $prefix = 'TLC\\Hook\\';
     $baseDir = __DIR__ . '/';
 
     $len = strlen($prefix);
@@ -26,8 +26,8 @@ spl_autoload_register(function ($class) {
 });
 
 // 2. Register Gzip Middleware
-if (class_exists(\Bastivan\UniversalApi\Hook\Middleware\GzipMiddleware::class)) {
-    (new \Bastivan\UniversalApi\Hook\Middleware\GzipMiddleware())->handle();
+if (class_exists(\TLC\Hook\Middleware\GzipMiddleware::class)) {
+    (new \TLC\Hook\Middleware\GzipMiddleware())->handle();
 }
 
 // 3. Load Routes

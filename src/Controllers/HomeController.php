@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Controllers;
+namespace TLC\Controllers;
 
-use Bastivan\UniversalApi\Core\Debugger;
-use Bastivan\UniversalApi\Core\Config;
-use Bastivan\UniversalApi\Core\Database;
+use TLC\Core\Debugger;
+use TLC\Core\Config;
+use TLC\Core\Database;
 
 /**
  * Class HomeController
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  */
 class HomeController
 {
@@ -44,7 +44,7 @@ class HomeController
         }
 
         try {
-            \Bastivan\UniversalApi\Core\Cache::getClient()->ping();
+            \TLC\Core\Cache::getClient()->ping();
         } catch (\Exception $e) {
             $redisStatus = 'error';
             $httpCode = 503; // Service Unavailable

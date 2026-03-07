@@ -1,11 +1,11 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Notification;
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Hook\Models\Activity;
-use Bastivan\UniversalApi\Hook\Middleware\AuthMiddleware;
+use TLC\Hook\Models\Notification;
+use TLC\Hook\Models\User;
+use TLC\Hook\Models\Activity;
+use TLC\Hook\Middleware\AuthMiddleware;
 use MongoDB\BSON\ObjectId;
 
 class NotificationController

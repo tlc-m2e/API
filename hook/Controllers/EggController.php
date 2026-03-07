@@ -1,9 +1,9 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\Egg;
-use Bastivan\UniversalApi\Hook\Core\Mongo;
+use TLC\Hook\Models\Egg;
+use TLC\Hook\Core\Mongo;
 use MongoDB\BSON\ObjectId;
 
 class EggController

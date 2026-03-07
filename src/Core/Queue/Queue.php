@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core\Queue;
+namespace TLC\Core\Queue;
 
-use Bastivan\UniversalApi\Core\Cache;
+use TLC\Core\Cache;
 
 /**
  * Class Queue
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Simple Redis-based Queue manager.
  */

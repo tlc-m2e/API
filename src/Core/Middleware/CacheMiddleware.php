@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core\Middleware;
+namespace TLC\Core\Middleware;
 
-use Bastivan\UniversalApi\Core\Cache;
+use TLC\Core\Cache;
 
 /**
  * Class CacheMiddleware
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Handles Route Caching.
  */

@@ -1,9 +1,9 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\User;
-use Bastivan\UniversalApi\Core\Config;
+use TLC\Hook\Models\User;
+use TLC\Core\Config;
 use Aws\Kms\KmsClient;
 
 class EncryptionController

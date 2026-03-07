@@ -1,13 +1,13 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Models\TransferAttempt;
-use Bastivan\UniversalApi\Hook\Models\SpendingWallet;
-use Bastivan\UniversalApi\Hook\Models\GameConstant;
-use Bastivan\UniversalApi\Hook\Models\Duck;
-use Bastivan\UniversalApi\Hook\Models\Egg;
-use Bastivan\UniversalApi\Hook\Middleware\AuthMiddleware;
+use TLC\Hook\Models\TransferAttempt;
+use TLC\Hook\Models\SpendingWallet;
+use TLC\Hook\Models\GameConstant;
+use TLC\Hook\Models\Duck;
+use TLC\Hook\Models\Egg;
+use TLC\Hook\Middleware\AuthMiddleware;
 use MongoDB\BSON\ObjectId;
 
 class TransferAttemptController
@@ -36,7 +36,7 @@ class TransferAttemptController
             echo json_encode(['error' => 'Unauthorized']);
             exit;
         }
-        $userModel = new \Bastivan\UniversalApi\Hook\Models\User();
+        $userModel = new \TLC\Hook\Models\User();
         $user = $userModel->findById($userId);
         if (!$user) {
             http_response_code(404);

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal API — Bastivan Consulting</title>
+    <title>Universal API — THE LIFE COINCOIN</title>
     <style>
         :root {
             /* Palette raffinée */
@@ -151,7 +151,7 @@
 <body>
     <div class="container">
         <header>
-            <span class="brand">Bastivan Consulting</span>
+            <span class="brand">THE LIFE COINCOIN</span>
             <h1>L'excellence technique<br>au service de vos API.</h1>
             <p class="subtitle">Une architecture Universal API robuste, sécurisée et modulaire pour les environnements cloud exigeants.</p>
             <a href="/status" class="cta">Consulter l'état des services &rarr;</a>
@@ -220,7 +220,7 @@
         </div>
 
         <footer>
-            <span>&copy; <?php echo date('Y'); ?> Bastivan Consulting.</span>
+            <span>&copy; <?php echo date('Y'); ?> THE LIFE COINCOIN.</span>
             <span>Universal API v1.0</span>
         </footer>
     </div>

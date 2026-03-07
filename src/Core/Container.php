@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core;
+namespace TLC\Core;
 
 /**
  * Class Container
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Simple Dependency Injection Container.
  */

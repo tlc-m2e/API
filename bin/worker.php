@@ -5,10 +5,10 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Bastivan\UniversalApi\Core\Bootstrap;
-use Bastivan\UniversalApi\Core\Queue\Queue;
-use Bastivan\UniversalApi\Core\Logger;
-use Bastivan\UniversalApi\Core\Queue\Job;
+use TLC\Core\Bootstrap;
+use TLC\Core\Queue\Queue;
+use TLC\Core\Logger;
+use TLC\Core\Queue\Job;
 
 // Initialize the application (load env, config, etc.)
 Bootstrap::init(__DIR__ . '/..');

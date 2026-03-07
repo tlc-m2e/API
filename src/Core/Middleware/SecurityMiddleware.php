@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Bastivan\UniversalApi\Core\Middleware;
+namespace TLC\Core\Middleware;
 
-use Bastivan\UniversalApi\Core\Config;
-use Bastivan\UniversalApi\Controllers\ErrorController;
+use TLC\Core\Config;
+use TLC\Controllers\ErrorController;
 
 /**
  * Class SecurityMiddleware
- * Developed by Bastivan Consulting
+ * Developed by THE LIFE COINCOIN
  *
  * Handles Security headers, HTTPS enforcement, and CDN IP resolution.
  */
@@ -35,7 +35,7 @@ class SecurityMiddleware
 
         $isHttps = false;
         $actualRemoteIp = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-        $isTrustedProxy = \Bastivan\UniversalApi\Core\TrustedProxyResolver::isTrusted($actualRemoteIp);
+        $isTrustedProxy = \TLC\Core\TrustedProxyResolver::isTrusted($actualRemoteIp);
 
         if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443) {
             $isHttps = true;
@@ -64,7 +64,7 @@ class SecurityMiddleware
         // We MUST verify that the request actually comes from a trusted proxy before accepting header spoofing.
         $actualRemoteIp = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
-        if (\Bastivan\UniversalApi\Core\TrustedProxyResolver::isTrusted($actualRemoteIp)) {
+        if (\TLC\Core\TrustedProxyResolver::isTrusted($actualRemoteIp)) {
             if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
                 // Cloudflare
                 $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
@@ -198,7 +198,7 @@ class SecurityMiddleware
 
             if (!in_array($clientIp, $allowedIps, true)) {
                 http_response_code(403);
-                echo "403 Forbidden - Access Denied by Route Policy - Bastivan Consulting";
+                echo "403 Forbidden - Access Denied by Route Policy - THE LIFE COINCOIN";
                 exit;
             }
         }
@@ -210,7 +210,7 @@ class SecurityMiddleware
 
             if (!in_array($currentMethod, $allowedMethods, true)) {
                 http_response_code(405);
-                echo "405 Method Not Allowed - Allowed: " . implode(', ', $allowedMethods) . " - Bastivan Consulting";
+                echo "405 Method Not Allowed - Allowed: " . implode(', ', $allowedMethods) . " - THE LIFE COINCOIN";
                 exit;
             }
         }

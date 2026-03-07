@@ -1,8 +1,8 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Services;
+namespace TLC\Hook\Services;
 
-use Bastivan\UniversalApi\Core\Config;
+use TLC\Core\Config;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 

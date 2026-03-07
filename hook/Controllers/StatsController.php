@@ -1,8 +1,8 @@
 <?php
 
-namespace Bastivan\UniversalApi\Hook\Controllers;
+namespace TLC\Hook\Controllers;
 
-use Bastivan\UniversalApi\Hook\Core\Mongo;
+use TLC\Hook\Core\Mongo;
 use MongoDB\BSON\UTCDateTime;
 
 class StatsController
