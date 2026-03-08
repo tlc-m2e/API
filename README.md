@@ -1,7 +1,14 @@
 # WHITE LABEL M2E API 🏃‍♂️🪙
 
+[![CI/CD Pipeline](https://github.com/tlc-m2e/API/actions/workflows/ci.yml/badge.svg)](https://github.com/tlc-m2e/API/actions/workflows/ci.yml)
+
 Bienvenue sur le moteur M2E "White Label", basé sur l'architecture de **THE LIFE COINCOIN**.
 Ce projet a été refactorisé pour être **100% SQL (MariaDB)** et entièrement **dynamique** (Marque Blanche).
+
+### Infrastructure Status
+![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+![OVH](https://img.shields.io/badge/ovh-%23123F6D.svg?style=for-the-badge&logo=ovh&logoColor=white)
 
 Chaque aspect du jeu (noms, monnaies, règles, entités) est défini dynamiquement par une configuration en base de données MariaDB. Fini les références statiques !
 
