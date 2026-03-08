@@ -29,15 +29,16 @@ class ErrorController
             ];
         }
 
-        // Check for Accept: application/json
-        if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
+        // Check for Accept: application/json or if we are in API mode
+        if (str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') || str_contains($_SERVER['REQUEST_URI'] ?? '', '/')) {
             header('Content-Type: application/json');
             $response = [
                 'error' => true,
                 'message' => $message,
             ];
 
-            if ($debug) {
+            // Never show technical debug data if not in debug mode
+            if ($isDebug && $debug) {
                 $response['debug'] = $debug;
             }
 

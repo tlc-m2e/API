@@ -77,4 +77,9 @@ class Logger
     {
         self::log('warning', $message, $context);
     }
+
+    public static function critical(string $message, array $context = []): void
+    {
+        self::log('critical', $message, $context);
+    }
 }

@@ -6,7 +6,7 @@ use TLC\Hook\Models\Entity;
 use TLC\Hook\Models\SpendingWallet;
 use TLC\Hook\Helpers\SettingsHelper;
 
-class LevelUpController
+class LevelUpController extends BaseController
 {
     private Entity $entityModel;
     private SpendingWallet $spendingWalletModel;
@@ -19,7 +19,7 @@ class LevelUpController
 
     private function getCurrentUserId()
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
         if (!$userId || !is_string($userId)) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);

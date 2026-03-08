@@ -6,7 +6,7 @@ use TLC\Hook\Models\Friend;
 use TLC\Hook\Models\User;
 use TLC\Hook\Models\Workout;
 
-class FriendController
+class FriendController extends BaseController
 {
     private Friend $friendModel;
     private User $userModel;
@@ -21,7 +21,7 @@ class FriendController
 
     private function getCurrentUser()
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
         if (!$userId) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);

@@ -8,7 +8,7 @@ use TLC\Hook\Models\Activity;
 use TLC\Hook\Middleware\AuthMiddleware;
 use MongoDB\BSON\ObjectId;
 
-class NotificationController
+class NotificationController extends BaseController
 {
     private Notification $notificationModel;
     private User $userModel;
@@ -40,25 +40,10 @@ class NotificationController
         return $user;
     }
 
-    private function isAdmin($user)
-    {
-        return isset($user['role']) && $user['role'] === 'admin';
-    }
-
-    private function checkAdmin()
-    {
-        $user = $this->getCurrentUser();
-        if (!$this->isAdmin($user)) {
-            http_response_code(403);
-            echo json_encode(['error' => 'Forbidden']);
-            exit;
-        }
-    }
-
     // GET /notifications/onlineUsers
     public function onlineUsers()
     {
-        $this->checkAdmin();
+        $this->requirePermission("viewLogs");
 
         // Count users with activity in the last 5 minutes.
         $fiveMinutesAgo = new \MongoDB\BSON\UTCDateTime((time() - 300) * 1000);
@@ -96,7 +81,7 @@ class NotificationController
     // POST /notifications/notify/users
     public function notifyUsers()
     {
-        $this->checkAdmin();
+        $this->requirePermission("updateConfig");
         $data = json_decode(file_get_contents('php://input'), true);
 
         $userIds = $data['user_ids'] ?? [];
@@ -142,7 +127,7 @@ class NotificationController
     // POST /notifications/notify/groups
     public function notifyGroups()
     {
-        $this->checkAdmin();
+        $this->requirePermission("updateConfig");
         $data = json_decode(file_get_contents('php://input'), true);
 
         $groups = $data['groups'] ?? []; // e.g. ['admin', 'user']

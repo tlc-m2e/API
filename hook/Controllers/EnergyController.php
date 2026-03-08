@@ -6,7 +6,7 @@ use TLC\Hook\Models\SpendingWallet;
 use TLC\Hook\Models\User;
 use MongoDB\BSON\ObjectId;
 
-class EnergyController
+class EnergyController extends BaseController
 {
     private SpendingWallet $spendingWalletModel;
     private User $userModel;

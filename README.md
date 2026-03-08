@@ -186,3 +186,23 @@ Le projet repose sur une architecture **MVC Custom** située dans le dossier `ho
 Développé pour **THE LIFE COINCOIN**. Open Source M2E.
 Créé par **Vibe coder**.
 Basé sur le framework *Universal API* de **THE LIFE COINCOIN**.
+
+---
+
+## 🔒 Sécurité et Conformité ISO 27001
+
+L'application intègre des mesures de sécurité avancées pour répondre aux exigences de la norme ISO 27001 :
+
+### 1. Audit Trail (Contrôle ISO A.12.4)
+Toutes les actions sensibles (création, modification, suppression) effectuées sur les modèles de données sont tracées automatiquement dans la table `audit_logs`.
+*   **Contenu :** Utilisateur, Action, Type de ressource, ID, Valeurs précédentes, Nouvelles valeurs, Adresse IP, User-Agent, Date.
+
+### 2. Chiffrement des données au repos (Contrôle ISO A.10.1)
+Les données personnelles identifiables (PII), telles que les adresses e-mail, sont chiffrées en base de données à l'aide de l'algorithme `AES-256-CBC`.
+*   **Configuration requise :** Définir la variable d'environnement `ENCRYPTION_KEY` avec une clé secrète de 32 caractères dans votre fichier `.env`.
+
+### 3. Contrôle d'Accès Granulaire (RBAC - Contrôle ISO A.9)
+L'accès aux fonctionnalités d'administration est régi par un système de permissions basé sur les rôles (RBAC). Les tables `permissions` et `role_permissions` permettent d'attribuer des droits spécifiques (ex: `updateConfig`, `viewLogs`).
+
+### 4. Filtrage et Masquage JSON
+Toutes les sorties API sont filtrées automatiquement pour masquer les champs sensibles (`password`, `private_key`, `secret`, `internal_log`). En production (`APP_DEBUG=false`), aucune information technique n'est divulguée dans les réponses JSON d'erreur.

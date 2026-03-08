@@ -83,7 +83,7 @@ public function loginWithOtp()
 
 ## 3. Middleware d'Authentification (AuthMiddleware)
 
-Le middleware intercepte chaque requête, vérifie la signature du JWT et peuple `$_REQUEST['user_id']`.
+Le middleware intercepte chaque requête, vérifie la signature du JWT et peuple `$_SERVER['user_id']`.
 
 **Fichier : `hook/Middleware/AuthMiddleware.php`**
 
@@ -114,8 +114,8 @@ class AuthMiddleware
         }
 
         // Injection du contexte utilisateur pour les contrôleurs
-        $_REQUEST['user_id'] = $payload->id ?? null;
-        $_REQUEST['user_email'] = $payload->email ?? null;
+        $_SERVER['user_id'] = $payload->id ?? null;
+        $_SERVER['user_email'] = $payload->email ?? null;
     }
 
     private static function abort()
@@ -137,7 +137,7 @@ Une fois passé le middleware, vous pouvez accéder à l'utilisateur courant sim
 public function getMeProfilePicture()
 {
     // Récupéré depuis le middleware
-    $userId = $_REQUEST['user_id'];
+    $userId = $_SERVER['user_id'];
 
     $user = $this->userModel->findById($userId);
     // ...

@@ -5,10 +5,15 @@ namespace TLC\Hook\Models;
 use TLC\Core\Database;
 use PDO;
 
+use TLC\Hook\Services\AuditService;
+use TLC\Hook\Services\EncryptionService;
+
 abstract class BaseModel
 {
     protected string $collectionName;
     protected PDO $db;
+    protected bool $auditEnabled = true;
+    protected array $encryptedFields = [];
 
     public function __construct()
     {
@@ -38,7 +43,7 @@ abstract class BaseModel
         return ['WHERE ' . implode(' AND ', $conditions), $params];
     }
 
-    public function findOne(array $filter)
+    public function findOne(array $filter, bool $decrypt = true)
     {
         list($where, $params) = $this->buildWhereClause($filter);
         $sql = "SELECT * FROM `{$this->collectionName}` $where LIMIT 1";
@@ -49,6 +54,14 @@ abstract class BaseModel
 
         if ($result && isset($result['id'])) {
             $result['_id'] = $result['id'];
+        }
+
+        if ($result && $decrypt) {
+            foreach ($this->encryptedFields as $field) {
+                if (isset($result[$field]) && !empty($result[$field])) {
+                    $result[$field] = EncryptionService::decrypt($result[$field]);
+                }
+            }
         }
 
         // Try to decode JSON metadata if it exists
@@ -62,7 +75,7 @@ abstract class BaseModel
         return $result ?: null;
     }
 
-    public function find(array $filter = [], array $options = [])
+    public function find(array $filter = [], array $options = [], bool $decrypt = true)
     {
         list($where, $params) = $this->buildWhereClause($filter);
 
@@ -96,6 +109,15 @@ abstract class BaseModel
             if (isset($result['id'])) {
                 $result['_id'] = $result['id'];
             }
+
+            if ($decrypt) {
+                foreach ($this->encryptedFields as $field) {
+                    if (isset($result[$field]) && !empty($result[$field])) {
+                        $result[$field] = EncryptionService::decrypt($result[$field]);
+                    }
+                }
+            }
+
             if (isset($result['metadata']) && is_string($result['metadata'])) {
                 $decoded = json_decode($result['metadata'], true);
                 if (json_last_error() === JSON_ERROR_NONE) {
@@ -127,6 +149,12 @@ abstract class BaseModel
             $data['created_at'] = date('Y-m-d H:i:s');
         }
 
+        foreach ($this->encryptedFields as $field) {
+            if (isset($data[$field]) && !empty($data[$field])) {
+                $data[$field] = EncryptionService::encrypt($data[$field]);
+            }
+        }
+
         // Handle possible JSON metadata column logic here if needed by descendants,
         // but for now we'll just insert columns directly.
         // If a property isn't a known column, a more advanced ORM would pack it into metadata.
@@ -140,6 +168,10 @@ abstract class BaseModel
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($data);
+
+        if ($this->auditEnabled) {
+            AuditService::log('create', $this->collectionName, $data['id'], null, $data);
+        }
 
         return $data['id'];
     }
@@ -194,8 +226,21 @@ abstract class BaseModel
             foreach ($update as $key => $value) {
                 if (strpos($key, '$') === 0) continue;
                 $sqlKey = $key === '_id' ? 'id' : $key;
+
+                if (in_array($sqlKey, $this->encryptedFields)) {
+                    $value = EncryptionService::encrypt($value);
+                }
+
                 $setClause[] = "`$sqlKey` = :update_$sqlKey";
                 $updateData["update_$sqlKey"] = $value;
+            }
+        } else {
+            // we already looped over `$set`, let's check for encrypted fields there
+            foreach ($updateData as $key => &$val) {
+                $sqlKey = preg_replace('/^update_/', '', $key);
+                if (in_array($sqlKey, $this->encryptedFields) && is_string($val)) {
+                    $val = EncryptionService::encrypt($val);
+                }
             }
         }
 
@@ -203,8 +248,26 @@ abstract class BaseModel
 
         $sql = "UPDATE `{$this->collectionName}` SET " . implode(', ', $setClause) . " $where";
 
+        // Get old values before update without decrypting
+        $oldRecord = null;
+        if ($this->auditEnabled) {
+            $oldRecord = $this->findOne($filter, false);
+        }
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(array_merge($updateData, $params));
+
+        if ($this->auditEnabled && $oldRecord) {
+            // Find what changed
+            $newValues = [];
+            foreach ($updateData as $key => $val) {
+                // simple mapping for now
+                $cleanKey = preg_replace('/^(update_|inc_)/', '', $key);
+                $newValues[$cleanKey] = $val;
+            }
+            // Add ID for context
+            AuditService::log('update', $this->collectionName, $oldRecord['id'] ?? 'unknown', $oldRecord, $newValues);
+        }
 
         // Mocking MongoDB UpdateResult
         return new class($stmt->rowCount()) {
@@ -226,9 +289,21 @@ abstract class BaseModel
         if (empty($where)) {
             return false;
         }
+
+        $oldRecord = null;
+        if ($this->auditEnabled) {
+            $oldRecord = $this->findOne($filter, false);
+        }
+
         $sql = "DELETE FROM `{$this->collectionName}` $where LIMIT 1";
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute($params);
+        $result = $stmt->execute($params);
+
+        if ($this->auditEnabled && $result && $oldRecord) {
+            AuditService::log('delete', $this->collectionName, $oldRecord['id'] ?? 'unknown', $oldRecord, null);
+        }
+
+        return $result;
     }
 
     public function findById($id)

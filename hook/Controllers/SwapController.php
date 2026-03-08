@@ -7,7 +7,7 @@ use TLC\Hook\Models\SpendingWallet;
 use TLC\Hook\Middleware\AuthMiddleware;
 use MongoDB\BSON\ObjectId;
 
-class SwapController
+class SwapController extends BaseController
 {
     private Swap $swapModel;
     private SpendingWallet $spendingWalletModel;

@@ -10,7 +10,7 @@ use TLC\Hook\Models\Egg;
 use TLC\Hook\Middleware\AuthMiddleware;
 use MongoDB\BSON\ObjectId;
 
-class TransferAttemptController
+class TransferAttemptController extends BaseController
 {
     private TransferAttempt $transferAttemptModel;
     private SpendingWallet $spendingWalletModel;

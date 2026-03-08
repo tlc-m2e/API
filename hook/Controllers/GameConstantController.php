@@ -7,7 +7,7 @@ use TLC\Hook\Models\User;
 use TLC\Hook\Helpers\RedisHelper;
 use MongoDB\BSON\ObjectId;
 
-class GameConstantController
+class GameConstantController extends BaseController
 {
     private GameConstant $gameConstantModel;
     private User $userModel;
@@ -20,7 +20,7 @@ class GameConstantController
 
     private function getCurrentUser()
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
         if (!$userId) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
@@ -35,28 +35,13 @@ class GameConstantController
         return $user;
     }
 
-    private function isAdmin($user)
-    {
-        return isset($user['role']) && (is_array($user['role']) ? in_array('admin', $user['role']) : $user['role'] === 'admin');
-    }
-
-    private function checkAdmin()
-    {
-        $user = $this->getCurrentUser();
-        if (!$this->isAdmin($user)) {
-            http_response_code(403);
-            echo json_encode(['error' => 'Forbidden']);
-            exit;
-        }
-    }
-
     /**
      * GET /gameConstants/
      * List all constants (Admin only)
      */
     public function list()
     {
-        $this->checkAdmin();
+        $this->requirePermission('updateConfig');
         $constants = $this->gameConstantModel->find([]);
 
         $result = [];
@@ -65,7 +50,7 @@ class GameConstantController
             $result[] = $c;
         }
 
-        echo json_encode($result);
+        echo json_encode($this->sanitizeOutput($result));
     }
 
     /**
@@ -132,7 +117,7 @@ class GameConstantController
      */
     public function update($id)
     {
-        $this->checkAdmin();
+        $this->requirePermission('updateConfig');
 
         $data = json_decode(file_get_contents('php://input'), true);
         if (empty($data)) {

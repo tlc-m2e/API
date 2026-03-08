@@ -6,7 +6,7 @@ use TLC\Hook\Models\Egg;
 use TLC\Hook\Core\Mongo;
 use MongoDB\BSON\ObjectId;
 
-class EggController
+class EggController extends BaseController
 {
     private Egg $eggModel;
 

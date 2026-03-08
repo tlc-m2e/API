@@ -9,7 +9,7 @@ use TLC\Hook\Models\Egg;
 use TLC\Hook\Helpers\RedisHelper;
 use TLC\Hook\Helpers\SettingsHelper;
 
-class SpendingWalletController
+class SpendingWalletController extends BaseController
 {
     private SpendingWallet $spendingWalletModel;
     private User $userModel;
@@ -26,7 +26,7 @@ class SpendingWalletController
 
     public function getTickets()
     {
-        $userId = $_REQUEST['user_id'];
+        $userId = $_SERVER['user_id'];
         $client = RedisHelper::getClient();
         $cacheKey = 'spending_tickets_' . $userId;
         $cached = $client->get($cacheKey);
@@ -49,7 +49,7 @@ class SpendingWalletController
 
     public function getBalance()
     {
-        $userId = $_REQUEST['user_id'];
+        $userId = $_SERVER['user_id'];
         $client = RedisHelper::getClient();
         $cacheKey = 'spending_balance_' . $userId;
         $cached = $client->get($cacheKey);
@@ -89,7 +89,7 @@ class SpendingWalletController
     public function entityTeam()
     {
         // Renamed from duckTeam
-        $userId = $_REQUEST['user_id'];
+        $userId = $_SERVER['user_id'];
         $client = RedisHelper::getClient();
         $cacheKey = 'spending_entity_team_' . $userId;
         $cached = $client->get($cacheKey);

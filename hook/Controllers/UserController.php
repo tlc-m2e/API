@@ -8,7 +8,7 @@ use TLC\Hook\Middleware\AuthMiddleware;
 use RobThree\Auth\TwoFactorAuth;
 use MongoDB\BSON\ObjectId;
 
-class UserController
+class UserController extends BaseController
 {
     private User $userModel;
     private JwtService $jwtService;
@@ -23,7 +23,7 @@ class UserController
 
     private function getCurrentUser()
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
         if (!$userId) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
@@ -38,20 +38,7 @@ class UserController
         return $user;
     }
 
-    private function isAdmin($user)
-    {
-        return isset($user['role']) && $user['role'] === 'admin';
-    }
-
-    private function checkAdmin()
-    {
-        $user = $this->getCurrentUser();
-        if (!$this->isAdmin($user)) {
-            http_response_code(403);
-            echo json_encode(['error' => 'Forbidden']);
-            exit;
-        }
-    }
+    // We can use the BaseController requirePermission method instead of checkAdmin
 
     public function refreshToken()
     {
@@ -147,7 +134,8 @@ class UserController
             echo json_encode(['valid' => true]);
         } else {
             http_response_code(401);
-            echo json_encode(['valid' => false, 'error' => 'Invalid code']);
+            \TLC\Core\Logger::critical("Security Alert: Failed 2FA verification attempt", ["user_id" => $user["_id"] ?? "unknown"]);
+            echo json_encode(["valid" => false, "error" => "Invalid code"]);
         }
     }
 
@@ -180,7 +168,7 @@ class UserController
 
     public function listUsers()
     {
-        $this->checkAdmin();
+        $this->requirePermission('viewLogs');
 
         $users = $this->userModel->find([]); // Fetch all
         // Clean data
@@ -200,12 +188,12 @@ class UserController
             $result[] = $u;
         }
 
-        echo json_encode($result);
+        echo json_encode($this->sanitizeOutput($result));
     }
 
     public function getUser($id)
     {
-        $this->checkAdmin();
+        $this->requirePermission('viewLogs');
 
         try {
             $user = $this->userModel->findById($id);
@@ -234,12 +222,12 @@ class UserController
             $user['updated_at'] = $user['updated_at']->toDateTime()->format(\DateTime::ISO8601);
         }
 
-        echo json_encode($user);
+        echo json_encode($this->sanitizeOutput($user));
     }
 
     public function banUser($id)
     {
-        $this->checkAdmin();
+        $this->requirePermission('updateConfig');
 
         // Ensure not banning self
         $currentUser = $this->getCurrentUser();
@@ -260,7 +248,7 @@ class UserController
 
     public function updateUser($id)
     {
-        $this->checkAdmin();
+        $this->requirePermission('updateConfig');
         $data = json_decode(file_get_contents('php://input'), true);
 
         $updateData = [];
@@ -284,7 +272,7 @@ class UserController
 
     public function deleteUser($id)
     {
-        $this->checkAdmin();
+        $this->requirePermission('updateConfig');
 
          // Ensure not deleting self
         $currentUser = $this->getCurrentUser();
@@ -478,7 +466,8 @@ class UserController
              }
              if (!$this->tfa->verifyCode($user['2fa_secret'], $data['twoFactorAuthToken'])) {
                   http_response_code(401);
-                  echo json_encode(['error' => 'Invalid 2FA token']);
+                  \TLC\Core\Logger::critical("Security Alert: Invalid 2FA token provided", ["user_id" => $user["_id"] ?? "unknown"]);
+                  echo json_encode(["error" => "Invalid 2FA token"]);
                   return;
              }
         }
@@ -498,7 +487,7 @@ class UserController
 
     public function addTicketToUsers()
     {
-        $this->checkAdmin();
+        $this->requirePermission('updateConfig');
         $data = json_decode(file_get_contents('php://input'), true);
 
         // logic to add tickets
@@ -514,7 +503,7 @@ class UserController
 
     public function sendUserNotification($id)
     {
-        $this->checkAdmin();
+        $this->requirePermission('updateConfig');
         $data = json_decode(file_get_contents('php://input'), true);
 
         // Logic to send notification (SSE or DB)

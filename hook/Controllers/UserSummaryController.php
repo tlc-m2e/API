@@ -6,7 +6,7 @@ use TLC\Hook\Models\User;
 use TLC\Hook\Models\BaseModel;
 use MongoDB\BSON\ObjectId;
 
-class UserSummaryController
+class UserSummaryController extends BaseController
 {
     private User $userModel;
     // We don't have a UserSummary model yet, so we'll use a generic BaseModel pointing to 'user_summaries' collection
@@ -23,7 +23,7 @@ class UserSummaryController
 
     private function getCurrentUser()
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
         if (!$userId) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);

@@ -5,7 +5,7 @@ namespace TLC\Hook\Controllers;
 use TLC\Hook\Core\Mongo;
 use MongoDB\BSON\UTCDateTime;
 
-class StatsController
+class StatsController extends BaseController
 {
     /**
      * Stats génériques pour une entité donnée.

@@ -6,7 +6,7 @@ use TLC\Hook\Models\Activity;
 use TLC\Hook\Models\SpendingWallet;
 use MongoDB\BSON\ObjectId;
 
-class ActivityController
+class ActivityController extends BaseController
 {
     private Activity $activityModel;
     private SpendingWallet $spendingWalletModel;
@@ -19,7 +19,7 @@ class ActivityController
 
     public function index()
     {
-        $userId = $_REQUEST['user_id'];
+        $userId = $_SERVER['user_id'];
         $userObjectId = new ObjectId($userId);
 
         $spendingWallet = $this->spendingWalletModel->findOne(['user' => $userObjectId]);

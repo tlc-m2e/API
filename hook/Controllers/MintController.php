@@ -12,7 +12,7 @@ use TLC\Hook\Models\DuckSpending;
 use TLC\Hook\Models\EggSpending;
 use TLC\Hook\Helpers\MintHelper;
 
-class MintController
+class MintController extends BaseController
 {
     private $userModel;
     private $spendingWalletModel;
@@ -37,7 +37,7 @@ class MintController
 
     private function getMe()
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
         if (!$userId) {
             throw new \Exception("Unauthorized", 401);
         }

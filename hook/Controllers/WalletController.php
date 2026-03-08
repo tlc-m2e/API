@@ -7,7 +7,7 @@ use TLC\Hook\Models\BaseModel; // Assuming Wallet is simple or we use BaseModel 
 use TLC\Hook\Models\SpendingWallet;
 use MongoDB\BSON\ObjectId;
 
-class WalletController
+class WalletController extends BaseController
 {
     private User $userModel;
     private BaseModel $walletModel;
@@ -23,7 +23,7 @@ class WalletController
 
     private function getCurrentUser()
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
         if (!$userId) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
