@@ -43,18 +43,19 @@ class StorageService
      */
     public function uploadFile(string $key, string $sourceFile, string $mimeType): string
     {
+        if (empty($this->kmsKeyId)) {
+            throw new \Exception("FIPS Compliance Error: S3 uploads require a KMS Key for encryption.");
+        }
+
         try {
             $params = [
                 'Bucket' => $this->bucket,
                 'Key'    => $key,
                 'SourceFile' => $sourceFile,
                 'ContentType' => $mimeType,
+                'ServerSideEncryption' => 'aws:kms',
+                'SSEKMSKeyId' => $this->kmsKeyId,
             ];
-
-            if ($this->kmsKeyId) {
-                $params['ServerSideEncryption'] = 'aws:kms';
-                $params['SSEKMSKeyId'] = $this->kmsKeyId;
-            }
 
             $this->client->putObject($params);
 
