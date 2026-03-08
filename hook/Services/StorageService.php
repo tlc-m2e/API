@@ -18,7 +18,7 @@ class StorageService
         $endpoint = $_ENV['OVH_S3_ENDPOINT'] ?? 'https://s3.gra.io.cloud.ovh.net';
         $key = $_ENV['OVH_S3_ACCESS_KEY'] ?? '';
         $secret = $_ENV['OVH_S3_SECRET_KEY'] ?? '';
-        $this->bucket = $_ENV['OVH_S3_BUCKET_NAME'] ?? '';
+        $this->bucket = $_ENV['OVH_S3_BUCKET'] ?? '';
         $this->kmsKeyId = $_ENV['OVH_KMS_KEY_ID'] ?? null;
 
         $this->client = new S3Client([
@@ -43,18 +43,19 @@ class StorageService
      */
     public function uploadFile(string $key, string $sourceFile, string $mimeType): string
     {
+        if (empty($this->kmsKeyId)) {
+            throw new \Exception("FIPS Compliance Error: S3 uploads require a KMS Key for encryption.");
+        }
+
         try {
             $params = [
                 'Bucket' => $this->bucket,
                 'Key'    => $key,
                 'SourceFile' => $sourceFile,
                 'ContentType' => $mimeType,
+                'ServerSideEncryption' => 'aws:kms',
+                'SSEKMSKeyId' => $this->kmsKeyId,
             ];
-
-            if ($this->kmsKeyId) {
-                $params['ServerSideEncryption'] = 'aws:kms';
-                $params['SSEKMSKeyId'] = $this->kmsKeyId;
-            }
 
             $this->client->putObject($params);
 

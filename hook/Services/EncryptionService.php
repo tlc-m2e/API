@@ -4,7 +4,8 @@ namespace TLC\Hook\Services;
 
 class EncryptionService
 {
-    private const CIPHER = 'aes-256-cbc';
+    private const CIPHER = 'aes-256-gcm';
+    private const TAG_LENGTH = 16;
 
     public static function encrypt(string $data): string
     {
@@ -20,9 +21,11 @@ class EncryptionService
 
         // Ensure key is 32 bytes for AES-256
         $hashedKey = hash('sha256', $key, true);
-        $ciphertext_raw = openssl_encrypt($data, self::CIPHER, $hashedKey, OPENSSL_RAW_DATA, $iv);
-        $hmac = hash_hmac('sha256', $ciphertext_raw, $key, true);
-        return base64_encode($iv . $hmac . $ciphertext_raw);
+
+        $tag = '';
+        $ciphertext_raw = openssl_encrypt($data, self::CIPHER, $hashedKey, OPENSSL_RAW_DATA, $iv, $tag, '', self::TAG_LENGTH);
+
+        return base64_encode($iv . $tag . $ciphertext_raw);
     }
 
     public static function decrypt(string $ciphertext): string
@@ -37,21 +40,17 @@ class EncryptionService
             return $ciphertext; // Invalid base64
         }
         $ivlen = openssl_cipher_iv_length(self::CIPHER);
-        if (strlen($c) < $ivlen + 32) { // 32 is sha256 hmac length
+        if (strlen($c) < $ivlen + self::TAG_LENGTH) {
             return $ciphertext; // Invalid format
         }
 
         $iv = substr($c, 0, $ivlen);
-        $hmac = substr($c, $ivlen, 32);
-        $ciphertext_raw = substr($c, $ivlen + 32);
+        $tag = substr($c, $ivlen, self::TAG_LENGTH);
+        $ciphertext_raw = substr($c, $ivlen + self::TAG_LENGTH);
 
         $hashedKey = hash('sha256', $key, true);
-        $calcmac = hash_hmac('sha256', $ciphertext_raw, $key, true);
-        if (hash_equals($hmac, $calcmac)) {
-            $decrypted = openssl_decrypt($ciphertext_raw, self::CIPHER, $hashedKey, OPENSSL_RAW_DATA, $iv);
-            return $decrypted !== false ? $decrypted : $ciphertext;
-        }
 
-        return $ciphertext; // Decryption failed
+        $decrypted = openssl_decrypt($ciphertext_raw, self::CIPHER, $hashedKey, OPENSSL_RAW_DATA, $iv, $tag);
+        return $decrypted !== false ? $decrypted : $ciphertext;
     }
 }

@@ -7,7 +7,6 @@ use TLC\Hook\Services\JwtService;
 use TLC\Hook\Services\StorageService;
 use TLC\Hook\Middleware\AuthMiddleware;
 use RobThree\Auth\TwoFactorAuth;
-use MongoDB\BSON\ObjectId;
 
 class UserController extends BaseController
 {
@@ -242,7 +241,7 @@ class UserController extends BaseController
 
         // Update user status
         $this->userModel->updateOne(
-            ['_id' => new ObjectId($id)],
+            ['_id' => $id],
             ['$set' => ['banned' => true]]
         );
 
@@ -266,7 +265,7 @@ class UserController extends BaseController
         }
 
         $this->userModel->updateOne(
-            ['_id' => new ObjectId($id)],
+            ['_id' => $id],
             ['$set' => $updateData]
         );
 
@@ -285,7 +284,7 @@ class UserController extends BaseController
             return;
         }
 
-        $this->userModel->deleteOne(['_id' => new ObjectId($id)]);
+        $this->userModel->deleteOne(['_id' => $id]);
 
         echo json_encode(['message' => 'User deleted']);
     }
@@ -326,7 +325,7 @@ class UserController extends BaseController
         if (isset($data['age'])) $updateData['age'] = (int)$data['age'];
         if (isset($data['gender'])) $updateData['gender'] = $data['gender'];
         if (isset($data['pseudo'])) $updateData['pseudo'] = $data['pseudo'];
-        if (isset($data['profilePicture'])) $updateData['profilePicture'] = $data['profilePicture'];
+        if (isset($data['profilePicture'])) $updateData['profile_picture'] = $data['profilePicture'];
         if (isset($data['is_public'])) $updateData['is_public'] = (bool)$data['is_public'];
 
         if (isset($data['password'])) {
@@ -412,7 +411,7 @@ class UserController extends BaseController
     {
         $user = $this->getCurrentUser();
 
-        $profilePicture = $user['profilePicture'] ?? '';
+        $profilePicture = $user['profile_picture'] ?? '';
 
         if ($profilePicture && str_starts_with($profilePicture, 's3://')) {
             try {
@@ -455,7 +454,7 @@ class UserController extends BaseController
 
                 $this->userModel->updateOne(
                     ['_id' => $user['_id']],
-                    ['$set' => ['profilePicture' => $s3Uri]]
+                    ['$set' => ['profile_picture' => $s3Uri]]
                 );
 
                 // Generate presigned URL for immediate client use
