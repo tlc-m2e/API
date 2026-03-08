@@ -6,7 +6,7 @@ use TLC\Hook\Models\Entity;
 use TLC\Hook\Helpers\RedisHelper;
 use TLC\Hook\Helpers\SettingsHelper;
 
-class EntityController
+class EntityController extends BaseController
 {
     private Entity $entityModel;
 
@@ -138,6 +138,19 @@ class EntityController
              http_response_code(400);
              echo json_encode(['error' => 'Invalid JSON']);
              return;
+        }
+
+        if (isset($data['metadata']) && is_array($data['metadata'])) {
+            $schema = [
+                'pockets' => 'int',
+                'status' => 'string'
+            ];
+            if (!$this->validateMetadata($data['metadata'], $schema)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid metadata schema']);
+                return;
+            }
+            $data['metadata'] = json_encode($data['metadata']);
         }
 
         $this->entityModel->updateOne(
@@ -273,6 +286,19 @@ class EntityController
         $data = json_decode(file_get_contents('php://input'), true);
         if (!$data) {
              $data = [];
+        }
+
+        if (isset($data['metadata']) && is_array($data['metadata'])) {
+            $schema = [
+                'pockets' => 'int',
+                'status' => 'string'
+            ];
+            if (!$this->validateMetadata($data['metadata'], $schema)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid metadata schema']);
+                return;
+            }
+            $data['metadata'] = json_encode($data['metadata']);
         }
 
         $id = $this->entityModel->create($data);

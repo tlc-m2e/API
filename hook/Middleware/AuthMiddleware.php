@@ -23,12 +23,10 @@ class AuthMiddleware
             self::abort();
         }
 
-        // Store user info in global context or request if possible,
-        // for now we rely on the controller re-verifying or extracting if needed
-        // But a cleaner way is to inject it.
-        // Since this is a static middleware in the hook system, we might set a global.
-        $_REQUEST['user_id'] = $payload->id ?? null;
-        $_REQUEST['user_email'] = $payload->email ?? null;
+        // Store user info in global context securely (e.g., $_SERVER)
+        // to prevent spoofing via query parameters
+        $_SERVER['user_id'] = $payload->id ?? null;
+        $_SERVER['user_email'] = $payload->email ?? null;
     }
 
     private static function abort()

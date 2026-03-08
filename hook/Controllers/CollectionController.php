@@ -4,7 +4,7 @@ namespace TLC\Hook\Controllers;
 
 use TLC\Hook\Models\Collection;
 
-class CollectionController
+class CollectionController extends BaseController
 {
     private Collection $collectionModel;
 

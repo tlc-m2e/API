@@ -7,7 +7,7 @@ use TLC\Hook\Models\Pot;
 use TLC\Hook\Models\Sale;
 use MongoDB\BSON\ObjectId;
 
-class MarketplaceController
+class MarketplaceController extends BaseController
 {
     private Listing $listingModel;
     private Pot $potModel;
@@ -46,7 +46,7 @@ class MarketplaceController
 
         $id = $this->listingModel->create([
             'item_id' => new ObjectId($data['item_id']),
-            'seller_id' => new ObjectId($_REQUEST['user_id']), // From Auth Middleware
+            'seller_id' => new ObjectId($_SERVER['user_id']), // From Auth Middleware
             'price' => $data['price'],
             'currency' => $data['currency'] ?? 'SOL',
             'status' => 'active'

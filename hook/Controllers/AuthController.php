@@ -6,7 +6,7 @@ use TLC\Hook\Models\User;
 use TLC\Hook\Services\JwtService;
 use TLC\Hook\Services\MailService;
 
-class AuthController
+class AuthController extends BaseController
 {
     private User $userModel;
     private JwtService $jwtService;
@@ -331,7 +331,7 @@ class AuthController
 
     public function me()
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
         if (!$userId) {
             http_response_code(401);
             return;
@@ -348,6 +348,6 @@ class AuthController
             $user['updated_at'] = $user['updated_at']->toDateTime()->format(\DateTime::ISO8601);
         }
 
-        echo json_encode($user);
+        echo json_encode($this->sanitizeOutput($user));
     }
 }

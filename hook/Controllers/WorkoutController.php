@@ -8,7 +8,7 @@ use TLC\Hook\Helpers\RedisHelper;
 use TLC\Hook\Helpers\SettingsHelper;
 use TLC\Hook\Services\AIService;
 
-class WorkoutController
+class WorkoutController extends BaseController
 {
     private Workout $workoutModel;
     private User $userModel;
@@ -36,25 +36,10 @@ class WorkoutController
         return $user;
     }
 
-    private function isAdmin($user)
-    {
-        return isset($user['role']) && (is_array($user['role']) ? in_array('admin', $user['role']) : $user['role'] === 'admin');
-    }
-
-    private function checkAdmin()
-    {
-        $user = $this->getCurrentUser();
-        if (!$this->isAdmin($user)) {
-            http_response_code(403);
-            echo json_encode(['error' => 'Forbidden']);
-            exit;
-        }
-    }
-
     // POST /workout/calculateUsersSummary
     public function calculateUsersSummary()
     {
-        $this->checkAdmin();
+        $this->requirePermission("updateConfig");
         // Logic to recalculate users summaries
         // This is a heavy operation, should be a Job. For now we just return.
         echo json_encode(['message' => 'Recalculation of users summaries initiated']);
@@ -302,7 +287,7 @@ class WorkoutController
     // POST /workout/admin/recomputeFinalStats/:workoutId
     public function recomputeFinalStats($workoutId)
     {
-        $this->checkAdmin();
+        $this->requirePermission("updateConfig");
         echo json_encode(['message' => "Recomputing stats for workout $workoutId"]);
     }
 
@@ -310,7 +295,7 @@ class WorkoutController
     public function analyze($workoutId)
     {
         // Require admin or specific permission to run AI analysis manually
-        $this->checkAdmin();
+        $this->requirePermission("updateConfig");
 
         $workout = $this->workoutModel->findOne(['id' => $workoutId]);
 

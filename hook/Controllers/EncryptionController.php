@@ -6,7 +6,7 @@ use TLC\Hook\Models\User;
 use TLC\Core\Config;
 use Aws\Kms\KmsClient;
 
-class EncryptionController
+class EncryptionController extends BaseController
 {
     private User $userModel;
 

@@ -6,7 +6,7 @@ use TLC\Hook\Helpers\UserSettingHelper;
 use TLC\Hook\Models\UserSetting;
 use MongoDB\BSON\ObjectId;
 
-class UserSettingController
+class UserSettingController extends BaseController
 {
     private UserSetting $userSettingModel;
 
@@ -17,7 +17,7 @@ class UserSettingController
 
     public function getAllSettings()
     {
-        $userId = new ObjectId($_REQUEST['user_id']);
+        $userId = new ObjectId($_SERVER['user_id']);
         $settingsInDb = $this->userSettingModel->find(['user_id' => $userId]);
         $defaultSettings = UserSettingHelper::getDefinitions();
 
@@ -48,7 +48,7 @@ class UserSettingController
 
     public function getSetting($settingKey)
     {
-        $userId = new ObjectId($_REQUEST['user_id']);
+        $userId = new ObjectId($_SERVER['user_id']);
         $settingInDb = $this->userSettingModel->findOne([
             'user_id' => $userId,
             'setting_key' => $settingKey
@@ -82,7 +82,7 @@ class UserSettingController
 
     public function updateSetting($settingKey)
     {
-        $userId = new ObjectId($_REQUEST['user_id']);
+        $userId = new ObjectId($_SERVER['user_id']);
         $input = json_decode(file_get_contents('php://input'), true);
 
         if (!isset($input['value'])) {

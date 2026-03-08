@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TLC\Hook\Controllers;
 
-class CustomController
+class CustomController extends BaseController
 {
     public function index(): void
     {

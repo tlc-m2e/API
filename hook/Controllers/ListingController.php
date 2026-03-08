@@ -11,7 +11,7 @@ use TLC\Hook\Middleware\AuthMiddleware;
 use TLC\Hook\Helpers\RedisHelper;
 use MongoDB\BSON\ObjectId;
 
-class ListingController
+class ListingController extends BaseController
 {
     private Listing $listingModel;
     private Sale $saleModel;
@@ -78,7 +78,7 @@ class ListingController
     public function create()
     {
         $data = json_decode(file_get_contents('php://input'), true);
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
 
         if (!$userId || !is_string($userId)) {
              http_response_code(401);
@@ -162,7 +162,7 @@ class ListingController
     // POST /api/marketplace/listing/buy/:listingId
     public function buy($listingId)
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
         if (!$userId || !is_string($userId)) {
              http_response_code(401);
              echo json_encode(['error' => 'Unauthorized']);
@@ -250,7 +250,7 @@ class ListingController
     // DELETE /api/marketplace/listing/:listingId
     public function delete($listingId)
     {
-        $userId = $_REQUEST['user_id'] ?? null;
+        $userId = $_SERVER['user_id'] ?? null;
          if (!$userId || !is_string($userId)) {
              http_response_code(401);
              echo json_encode(['error' => 'Unauthorized']);

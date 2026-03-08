@@ -170,3 +170,41 @@ INSERT INTO `game_constants` (`id`, `key`, `value`, `description`) VALUES
 
 INSERT INTO `spending_wallets` (`id`, `user_id`, `amountOfSOL`, `amountOfCOIN`, `amountOfTOKEN`, `amountOfSeed`, `energy`) VALUES ('65e012a9b3c4d5e6f7a8b9cc', '65e012a9b3c4d5e6f7a8b9c0', 1.5, 500, 100, 20, 10);
 INSERT INTO `game_entities` (`id`, `owner_id`, `name`, `level`, `type`, `metadata`) VALUES ('65e012a9b3c4d5e6f7a8b9cd', '65e012a9b3c4d5e6f7a8b9c0', 'Runner #1', 5, 'main', '{"pockets": 0, "status": "idle"}');
+
+-- Audit Trail
+CREATE TABLE IF NOT EXISTS `audit_logs` (
+  `id` VARCHAR(24) PRIMARY KEY,
+  `user_id` VARCHAR(24) NULL,
+  `action` VARCHAR(50) NOT NULL,
+  `resource_type` VARCHAR(100) NOT NULL,
+  `resource_id` VARCHAR(24) NOT NULL,
+  `old_values` JSON DEFAULT NULL,
+  `new_values` JSON DEFAULT NULL,
+  `ip_address` VARCHAR(45) DEFAULT NULL,
+  `user_agent` VARCHAR(255) DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RBAC Permissions
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL UNIQUE,
+  `description` VARCHAR(255) NULL
+);
+
+CREATE TABLE IF NOT EXISTS `role_permissions` (
+  `role` VARCHAR(50) NOT NULL,
+  `permission_id` INT NOT NULL,
+  PRIMARY KEY (`role`, `permission_id`),
+  FOREIGN KEY (`permission_id`) REFERENCES `permissions`(`id`) ON DELETE CASCADE
+);
+
+INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
+(1, 'burnWallet', 'Allows burning tokens from a wallet'),
+(2, 'updateConfig', 'Allows updating game constants'),
+(3, 'viewLogs', 'Allows viewing system and audit logs');
+
+INSERT INTO `role_permissions` (`role`, `permission_id`) VALUES
+('admin', 1),
+('admin', 2),
+('admin', 3);
