@@ -4,21 +4,23 @@ namespace TLC\Hook\Controllers;
 
 use TLC\Hook\Models\User;
 use TLC\Hook\Services\JwtService;
+use TLC\Hook\Services\StorageService;
 use TLC\Hook\Middleware\AuthMiddleware;
 use RobThree\Auth\TwoFactorAuth;
-use MongoDB\BSON\ObjectId;
 
 class UserController extends BaseController
 {
     private User $userModel;
     private JwtService $jwtService;
     private TwoFactorAuth $tfa;
+    private StorageService $storageService;
 
     public function __construct()
     {
         $this->userModel = new User();
         $this->jwtService = new JwtService();
         $this->tfa = new TwoFactorAuth(issuer: 'TLC'); // Issuer name
+        $this->storageService = new StorageService();
     }
 
     private function getCurrentUser()
@@ -239,7 +241,7 @@ class UserController extends BaseController
 
         // Update user status
         $this->userModel->updateOne(
-            ['_id' => new ObjectId($id)],
+            ['_id' => $id],
             ['$set' => ['banned' => true]]
         );
 
@@ -263,7 +265,7 @@ class UserController extends BaseController
         }
 
         $this->userModel->updateOne(
-            ['_id' => new ObjectId($id)],
+            ['_id' => $id],
             ['$set' => $updateData]
         );
 
@@ -282,7 +284,7 @@ class UserController extends BaseController
             return;
         }
 
-        $this->userModel->deleteOne(['_id' => new ObjectId($id)]);
+        $this->userModel->deleteOne(['_id' => $id]);
 
         echo json_encode(['message' => 'User deleted']);
     }
@@ -323,7 +325,7 @@ class UserController extends BaseController
         if (isset($data['age'])) $updateData['age'] = (int)$data['age'];
         if (isset($data['gender'])) $updateData['gender'] = $data['gender'];
         if (isset($data['pseudo'])) $updateData['pseudo'] = $data['pseudo'];
-        if (isset($data['profilePicture'])) $updateData['profilePicture'] = $data['profilePicture'];
+        if (isset($data['profilePicture'])) $updateData['profile_picture'] = $data['profilePicture'];
         if (isset($data['is_public'])) $updateData['is_public'] = (bool)$data['is_public'];
 
         if (isset($data['password'])) {
@@ -408,33 +410,64 @@ class UserController extends BaseController
     public function getMeProfilePicture()
     {
         $user = $this->getCurrentUser();
-        // Since we don't have AWS S3 service integration here, we return the stored URL or base64
-        echo json_encode(['item' => $user['profilePicture'] ?? '']);
+
+        $profilePicture = $user['profile_picture'] ?? '';
+
+        if ($profilePicture && str_starts_with($profilePicture, 's3://')) {
+            try {
+                $profilePicture = $this->storageService->getPresignedUrl($profilePicture);
+            } catch (\Exception $e) {
+                // Return empty or fallback if failed to generate presigned url
+                $profilePicture = '';
+            }
+        }
+
+        echo json_encode(['item' => $profilePicture]);
     }
 
     public function updateMeProfilePicture()
     {
         $user = $this->getCurrentUser();
-        // Handling file upload in PHP is different.
-        // For now, let's assume the body contains a base64 string or URL in 'file' field as fallback,
-        // OR we handle multipart/form-data.
-        // Given complexity of S3 without AWS SDK setup here, we'll mock success if file is sent.
 
         // Check if file is uploaded via $_FILES
         if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-             // Mock upload: read file content as base64 (not recommended for large files but simple for now)
-             $content = file_get_contents($_FILES['file']['tmp_name']);
-             $base64 = 'data:' . $_FILES['file']['type'] . ';base64,' . base64_encode($content);
+            $sourceFile = $_FILES['file']['tmp_name'];
+            $mimeType = $_FILES['file']['type'];
+            $extension = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+            if (!$extension) {
+                // Determine extension from mime type roughly
+                $mimeMap = [
+                    'image/jpeg' => 'jpg',
+                    'image/png' => 'png',
+                    'image/gif' => 'gif',
+                    'image/webp' => 'webp',
+                ];
+                $extension = $mimeMap[$mimeType] ?? 'jpg';
+            }
 
-             $this->userModel->updateOne(
-                ['_id' => $user['_id']],
-                ['$set' => ['profilePicture' => $base64]] // Storing base64 directly as simple storage
-            );
+            $userId = (string) $user['_id'];
+            $timestamp = time();
+            $key = "profiles/{$userId}_{$timestamp}.{$extension}";
 
-            echo json_encode(['item' => $base64]);
+            try {
+                $s3Uri = $this->storageService->uploadFile($key, $sourceFile, $mimeType);
+
+                $this->userModel->updateOne(
+                    ['_id' => $user['_id']],
+                    ['$set' => ['profile_picture' => $s3Uri]]
+                );
+
+                // Generate presigned URL for immediate client use
+                $presignedUrl = $this->storageService->getPresignedUrl($s3Uri);
+
+                echo json_encode(['item' => $presignedUrl]);
+            } catch (\Exception $e) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Failed to upload image']);
+            }
         } else {
-             http_response_code(400);
-             echo json_encode(['error' => 'No file uploaded']);
+            http_response_code(400);
+            echo json_encode(['error' => 'No file uploaded']);
         }
     }
 
