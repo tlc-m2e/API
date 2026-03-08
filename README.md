@@ -1,7 +1,5 @@
 # WHITE LABEL M2E API 🏃‍♂️🪙
 
-[![CI/CD Pipeline](https://github.com/tlc-m2e/API/actions/workflows/ci.yml/badge.svg)](https://github.com/tlc-m2e/API/actions/workflows/ci.yml)
-
 Bienvenue sur le moteur M2E "White Label", basé sur l'architecture de **THE LIFE COINCOIN**.
 Ce projet a été refactorisé pour être **100% SQL (MariaDB)** et entièrement **dynamique** (Marque Blanche).
 
