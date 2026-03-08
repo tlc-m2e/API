@@ -32,5 +32,14 @@ class Bootstrap
 
         // 3. Set Timezone
         date_default_timezone_set(Config::get('APP_TIMEZONE', 'UTC'));
+
+        // 4. Load Game Constants
+        if (class_exists(\TLC\Hook\Helpers\SettingsHelper::class)) {
+            try {
+                \TLC\Hook\Helpers\SettingsHelper::loadConstants();
+            } catch (\Exception $e) {
+                // Ignore DB error if run before migration
+            }
+        }
     }
 }

@@ -4,23 +4,23 @@ namespace TLC\Hook\Controllers;
 
 use TLC\Hook\Models\SpendingWallet;
 use TLC\Hook\Models\User;
-use TLC\Hook\Models\Duck;
+use TLC\Hook\Models\Entity;
 use TLC\Hook\Models\Egg;
 use TLC\Hook\Helpers\RedisHelper;
-use MongoDB\BSON\ObjectId;
+use TLC\Hook\Helpers\SettingsHelper;
 
 class SpendingWalletController
 {
     private SpendingWallet $spendingWalletModel;
     private User $userModel;
-    private Duck $duckModel;
+    private Entity $entityModel;
     private Egg $eggModel;
 
     public function __construct()
     {
         $this->spendingWalletModel = new SpendingWallet();
         $this->userModel = new User();
-        $this->duckModel = new Duck();
+        $this->entityModel = new Entity();
         $this->eggModel = new Egg();
     }
 
@@ -36,11 +36,10 @@ class SpendingWalletController
             return;
         }
 
-        $userObjectId = new ObjectId($userId);
-        $spendingWallet = $this->spendingWalletModel->findOne(['user' => $userObjectId]);
+        $spendingWallet = $this->spendingWalletModel->findOne(['user_id' => $userId]);
 
         if (!$spendingWallet) {
-            $spendingWallet = $this->createSpendingWallet($userObjectId);
+            $spendingWallet = $this->createSpendingWallet($userId);
         }
 
         $response = json_encode(['items' => $spendingWallet['tickets'] ?? []]);
@@ -60,17 +59,22 @@ class SpendingWalletController
             return;
         }
 
-        $userObjectId = new ObjectId($userId);
-        $spendingWallet = $this->spendingWalletModel->findOne(['user' => $userObjectId]);
+        $spendingWallet = $this->spendingWalletModel->findOne(['user_id' => $userId]);
 
         if (!$spendingWallet) {
-            $spendingWallet = $this->createSpendingWallet($userObjectId);
+            $spendingWallet = $this->createSpendingWallet($userId);
         }
 
+        $currency1 = SettingsHelper::getConstant('CURRENCY_1_NAME', 'SOL');
+        $currency2 = SettingsHelper::getConstant('CURRENCY_2_NAME', 'COIN');
+        $currency3 = SettingsHelper::getConstant('CURRENCY_3_NAME', 'TOKEN');
+
+        // Note: The database columns are still amountOfSOL, etc. based on schema.
+        // We map them dynamically in the JSON response here.
         $response = [
-            'balanceSol' => $spendingWallet['amountOfSOL'] ?? 0,
-            'balanceCoin' => $spendingWallet['amountOfCOIN'] ?? 0,
-            'balanceToken' => $spendingWallet['amountOfTOKEN'] ?? 0,
+            'balance' . ucfirst(strtolower($currency1)) => $spendingWallet['amountOfSOL'] ?? 0,
+            'balance' . ucfirst(strtolower($currency2)) => $spendingWallet['amountOfCOIN'] ?? 0,
+            'balance' . ucfirst(strtolower($currency3)) => $spendingWallet['amountOfTOKEN'] ?? 0,
             'balanceSeed' => $spendingWallet['amountOfSeed'] ?? 0,
             'energy' => $spendingWallet['energy'] ?? 0,
             'maxEnergy' => $spendingWallet['maxEnergy'] ?? 0,
@@ -82,12 +86,12 @@ class SpendingWalletController
         echo $json;
     }
 
-    public function duckTeam()
+    public function entityTeam()
     {
+        // Renamed from duckTeam
         $userId = $_REQUEST['user_id'];
-        // Team composition changes less frequently than balance, maybe 5 mins
         $client = RedisHelper::getClient();
-        $cacheKey = 'spending_duck_team_' . $userId;
+        $cacheKey = 'spending_entity_team_' . $userId;
         $cached = $client->get($cacheKey);
 
         if ($cached) {
@@ -95,14 +99,12 @@ class SpendingWalletController
             return;
         }
 
-        $userObjectId = new ObjectId($userId);
-        $spendingWallet = $this->spendingWalletModel->findOne(['user' => $userObjectId]);
+        $spendingWallet = $this->spendingWalletModel->findOne(['user_id' => $userId]);
 
         if (!$spendingWallet) {
-             $spendingWallet = $this->createSpendingWallet($userObjectId);
+             $spendingWallet = $this->createSpendingWallet($userId);
         }
 
-        // Implementation placeholder
         $response = [
             'main' => null,
             'supportOne' => null,
@@ -112,6 +114,12 @@ class SpendingWalletController
         $json = json_encode($response);
         $client->setex($cacheKey, 300, $json);
         echo $json;
+    }
+
+    public function duckTeam()
+    {
+        // Legacy alias to not break routes immediately if called
+        $this->entityTeam();
     }
 
     public function burnWallet()
@@ -133,15 +141,12 @@ class SpendingWalletController
             return;
         }
 
-        // Invalidate cache for potentially affected users? This is a burning wallet, usually system wallet.
-        // If it affects user balance, we'd need user_id.
-
         echo json_encode(['success' => true, 'message' => "Burned $amount $tokenType (Simulated)"]);
     }
 
     public function listWallets()
     {
-        // Admin route - Pagination is CRITICAL for 3k users
+        // Admin route
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
         $skip = ($page - 1) * $limit;
@@ -149,18 +154,19 @@ class SpendingWalletController
         $wallets = $this->spendingWalletModel->find([], ['limit' => $limit, 'skip' => $skip]);
         $items = [];
 
+        $currency1 = SettingsHelper::getConstant('CURRENCY_1_NAME', 'SOL');
+        $currency2 = SettingsHelper::getConstant('CURRENCY_2_NAME', 'COIN');
+        $currency3 = SettingsHelper::getConstant('CURRENCY_3_NAME', 'TOKEN');
+
         foreach ($wallets as $wallet) {
             $items[] = [
-                'balanceSol' => $wallet['amountOfSOL'] ?? 0,
-                'balanceCoin' => $wallet['amountOfCOIN'] ?? 0,
-                'balanceToken' => $wallet['amountOfTOKEN'] ?? 0,
-                'userId' => (string)($wallet['user'] ?? ''),
-                'spendingId' => (string)$wallet['_id'],
+                'balance' . ucfirst(strtolower($currency1)) => $wallet['amountOfSOL'] ?? 0,
+                'balance' . ucfirst(strtolower($currency2)) => $wallet['amountOfCOIN'] ?? 0,
+                'balance' . ucfirst(strtolower($currency3)) => $wallet['amountOfTOKEN'] ?? 0,
+                'userId' => (string)($wallet['user_id'] ?? ''),
+                'spendingId' => (string)$wallet['id'],
             ];
         }
-
-        // Count total for pagination meta (optional, can be expensive)
-        // $total = $this->spendingWalletModel->count([]);
 
         echo json_encode(['items' => $items, 'page' => $page, 'limit' => $limit]);
     }
@@ -170,14 +176,17 @@ class SpendingWalletController
          // Admin route
         $spendingWallet = $this->spendingWalletModel->findById($id);
 
+        $currency1 = SettingsHelper::getConstant('CURRENCY_1_NAME', 'SOL');
+        $currency2 = SettingsHelper::getConstant('CURRENCY_2_NAME', 'COIN');
+        $currency3 = SettingsHelper::getConstant('CURRENCY_3_NAME', 'TOKEN');
+
         if (!$spendingWallet) {
              echo json_encode([
-                'balanceSol' => 0,
-                'balanceCoin' => 0,
-                'balanceToken' => 0,
-                'ducks' => [],
-                'egge' => [],
-                'ducksTeam' => [
+                'balance' . ucfirst(strtolower($currency1)) => 0,
+                'balance' . ucfirst(strtolower($currency2)) => 0,
+                'balance' . ucfirst(strtolower($currency3)) => 0,
+                'entities' => [],
+                'entitiesTeam' => [
                   'main' => null,
                   'supportOne' => null,
                   'supportTwo' => null,
@@ -187,15 +196,14 @@ class SpendingWalletController
         }
 
         $response = [
-            'balanceSol' => $spendingWallet['amountOfSOL'] ?? 0,
-            'balanceCoin' => $spendingWallet['amountOfCOIN'] ?? 0,
-            'balanceToken' => $spendingWallet['amountOfTOKEN'] ?? 0,
+            'balance' . ucfirst(strtolower($currency1)) => $spendingWallet['amountOfSOL'] ?? 0,
+            'balance' . ucfirst(strtolower($currency2)) => $spendingWallet['amountOfCOIN'] ?? 0,
+            'balance' . ucfirst(strtolower($currency3)) => $spendingWallet['amountOfTOKEN'] ?? 0,
             'balanceSeed' => $spendingWallet['amountOfSeed'] ?? 0,
             'energy' => $spendingWallet['energy'] ?? 0,
             'maxEnergy' => $spendingWallet['maxEnergy'] ?? 0,
-             'ducks' => [],
-            'egge' => [],
-            'ducksTeam' => [
+            'entities' => [],
+            'entitiesTeam' => [
               'main' => null,
               'supportOne' => null,
               'supportTwo' => null,
@@ -230,16 +238,13 @@ class SpendingWalletController
         }
 
         $this->spendingWalletModel->updateOne(
-            ['_id' => new ObjectId($id)],
+            ['id' => $id],
             ['$set' => ['maxEndurance' => $maxEndurance]]
         );
 
-        // Invalidate cache for the user associated with this wallet
-        // But we only have wallet ID here. We need to find the wallet first to get user ID.
-        // It's an admin operation, slight overhead is fine.
         $wallet = $this->spendingWalletModel->findById($id);
-        if ($wallet && isset($wallet['user'])) {
-             $userId = (string)$wallet['user'];
+        if ($wallet && isset($wallet['user_id'])) {
+             $userId = (string)$wallet['user_id'];
              RedisHelper::getClient()->del(['spending_balance_' . $userId]);
         }
 
@@ -254,17 +259,16 @@ class SpendingWalletController
     private function createSpendingWallet($userId)
     {
         $data = [
-            'user' => $userId,
+            'user_id' => $userId,
             'amountOfSOL' => 0,
             'amountOfCOIN' => 0,
             'amountOfTOKEN' => 0,
             'amountOfSeed' => 0,
             'energy' => 0,
-            'created_at' => new \MongoDB\BSON\UTCDateTime(),
-            'updated_at' => new \MongoDB\BSON\UTCDateTime(),
+            'created_at' => date('Y-m-d H:i:s'),
         ];
         $id = $this->spendingWalletModel->create($data);
-        $data['_id'] = $id;
+        $data['id'] = $id;
         return $data;
     }
 }

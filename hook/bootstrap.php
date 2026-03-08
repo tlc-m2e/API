@@ -30,7 +30,16 @@ if (class_exists(\TLC\Hook\Middleware\GzipMiddleware::class)) {
     (new \TLC\Hook\Middleware\GzipMiddleware())->handle();
 }
 
-// 3. Load Routes
+// 3. Load SettingsHelper dynamically for SQL White Label
+if (class_exists(\TLC\Hook\Helpers\SettingsHelper::class)) {
+    try {
+        \TLC\Hook\Helpers\SettingsHelper::loadConstants();
+    } catch (\Exception $e) {
+        // Safe fail if DB not migrated yet
+    }
+}
+
+// 4. Load Routes
 $routesFile = __DIR__ . '/routes.php';
 if (file_exists($routesFile)) {
     require_once $routesFile;

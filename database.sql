@@ -49,27 +49,14 @@ CREATE TABLE IF NOT EXISTS `friends` (
 );
 
 -- Ducks (Main NFTs/Characters)
-CREATE TABLE IF NOT EXISTS `ducks` (
+-- Game Entities (Main NFTs/Characters/Items)
+CREATE TABLE IF NOT EXISTS `game_entities` (
   `id` VARCHAR(24) PRIMARY KEY,
   `owner_id` VARCHAR(24) NOT NULL,
-  `tokenId` VARCHAR(255) NULL,
   `name` VARCHAR(100) NOT NULL,
   `level` INT DEFAULT 1,
-  `pockets` INT DEFAULT 0,
-  `status` VARCHAR(50) DEFAULT 'idle',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
-);
-
-
--- Eggs
-CREATE TABLE IF NOT EXISTS `eggs` (
-  `id` VARCHAR(24) PRIMARY KEY,
-  `owner_id` VARCHAR(24) NOT NULL,
-  `tokenId` VARCHAR(255) NULL,
-  `type` VARCHAR(50) DEFAULT 'common',
-  `status` VARCHAR(50) DEFAULT 'incubating',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `type` VARCHAR(50) DEFAULT 'entity',
+  `metadata` JSON DEFAULT NULL,
   FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 );
 
@@ -149,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `mints` (
   `user_id` VARCHAR(24) NOT NULL,
   `parentOneId` VARCHAR(255) NULL,
   `parentTwoId` VARCHAR(255) NULL,
-  `eggId` VARCHAR(255) NULL,
+  `entityId` VARCHAR(255) NULL,
   `price` DECIMAL(18,8) NOT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
@@ -166,7 +153,20 @@ CREATE TABLE IF NOT EXISTS `game_constants` (
 
 -- Initial Mock Data
 INSERT INTO `users` (`id`, `email`, `password`, `role`) VALUES ('65e012a9b3c4d5e6f7a8b9c0', 'demo@thelifecoincoin.com', 'hashed_password_here', 'admin');
-INSERT INTO `game_constants` (`id`, `key`, `value`, `description`) VALUES ('65e012a9b3c4d5e6f7a8b9c1', 'GAME_CONSTANT_MINT_ENABLED', 'true', 'Is Minting Enabled');
-INSERT INTO `game_constants` (`id`, `key`, `value`, `description`) VALUES ('65e012a9b3c4d5e6f7a8b9c2', 'GAME_CONSTANT_MINT_PRICE', '50', 'Base price for minting an egg in TOKEN');
-INSERT INTO `spending_wallets` (`id`, `user_id`, `amountOfSOL`, `amountOfCOIN`, `amountOfTOKEN`, `amountOfSeed`, `energy`) VALUES ('65e012a9b3c4d5e6f7a8b9c3', '65e012a9b3c4d5e6f7a8b9c0', 1.5, 500, 100, 20, 10);
-INSERT INTO `ducks` (`id`, `owner_id`, `name`, `level`) VALUES ('65e012a9b3c4d5e6f7a8b9c4', '65e012a9b3c4d5e6f7a8b9c0', 'Runner Duck #1', 5);
+
+-- White Label Game Constants
+INSERT INTO `game_constants` (`id`, `key`, `value`, `description`) VALUES
+('65e012a9b3c4d5e6f7a8b9c1', 'APP_NAME', 'TLC M2E', 'The name of the application'),
+('65e012a9b3c4d5e6f7a8b9c2', 'ENTITY_NAME_SINGULAR', 'Runner', 'Singular name of the main game entity'),
+('65e012a9b3c4d5e6f7a8b9c3', 'ENTITY_NAME_PLURAL', 'Runners', 'Plural name of the main game entity'),
+('65e012a9b3c4d5e6f7a8b9c4', 'CURRENCY_1_NAME', 'SOL', 'Name of the first currency (Crypto)'),
+('65e012a9b3c4d5e6f7a8b9c5', 'CURRENCY_2_NAME', 'COIN', 'Name of the second currency (In-game earning)'),
+('65e012a9b3c4d5e6f7a8b9c6', 'CURRENCY_3_NAME', 'REWARD', 'Name of the third currency (Premium/Governance)'),
+('65e012a9b3c4d5e6f7a8b9c7', 'LEVEL_UP_BASE_COST', '10', 'Base cost multiplier for leveling up'),
+('65e012a9b3c4d5e6f7a8b9c8', 'ENERGY_REGEN_PER_HOUR', '1', 'Amount of energy regenerated per hour'),
+('65e012a9b3c4d5e6f7a8b9c9', 'REWARD_COEFFICIENT_KM', '5.5', 'Coins earned per kilometer ran'),
+('65e012a9b3c4d5e6f7a8b9ca', 'GAME_CONSTANT_MINT_ENABLED', 'true', 'Is Minting Enabled'),
+('65e012a9b3c4d5e6f7a8b9cb', 'GAME_CONSTANT_MINT_PRICE', '50', 'Base price for minting an entity');
+
+INSERT INTO `spending_wallets` (`id`, `user_id`, `amountOfSOL`, `amountOfCOIN`, `amountOfTOKEN`, `amountOfSeed`, `energy`) VALUES ('65e012a9b3c4d5e6f7a8b9cc', '65e012a9b3c4d5e6f7a8b9c0', 1.5, 500, 100, 20, 10);
+INSERT INTO `game_entities` (`id`, `owner_id`, `name`, `level`, `type`, `metadata`) VALUES ('65e012a9b3c4d5e6f7a8b9cd', '65e012a9b3c4d5e6f7a8b9c0', 'Runner #1', 5, 'main', '{"pockets": 0, "status": "idle"}');
