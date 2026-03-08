@@ -33,10 +33,16 @@ Cette API est propulsée par le framework **Universal API**, garantissant perfor
 
 ### Lancement Rapide
 
+1. **Obligation Légale (Important)** : Avant de démarrer l'API, vous devez vous renseigner auprès de l'AMF (France) ou de l'autorité compétente de votre juridiction concernant les régulations PSAN/MiCA, particulièrement pour l'utilisation des services de Swap et Marketplace. Vous devez activer `LEGAL_CONSENT=true` dans votre fichier `.env` pour confirmer que vous assumez ces responsabilités juridiques. L'API refusera de démarrer sans cela.
+
 ```bash
 # Cloner le projet (Open Source)
 git clone https://github.com/tlc-m2e/API
 cd API
+
+# Configurer l'environnement et le consentement légal
+cp .env.example .env
+# Éditer .env pour définir LEGAL_CONSENT=true
 
 # Lancer les services (API, MongoDB/MariaDB, Redis)
 docker-compose up -d --build
@@ -190,6 +196,19 @@ Le projet repose sur une architecture **MVC Custom** située dans le dossier `ho
 Développé pour **THE LIFE COINCOIN**. Open Source M2E.
 Créé par **Vibe coder**.
 Basé sur le framework *Universal API* de **THE LIFE COINCOIN**.
+
+---
+
+## ⚖️ Conformité (PSAN/MiCA) & Sécurité
+
+### Obligation d'Enregistrement PSAN/MiCA
+L'utilisation des fonctionnalités de **Swap** et de **Marketplace** (échange d'actifs numériques) au sein de cette API peut être soumise à des obligations réglementaires strictes selon votre juridiction (ex: enregistrement PSAN auprès de l'AMF en France, ou conformité MiCA au niveau européen). 
+Il est de la responsabilité de l'opérateur (vous) de s'assurer de la conformité légale de son déploiement. L'activation de l'API requiert l'acceptation explicite de ces responsabilités via la variable `LEGAL_CONSENT=true`.
+
+### Architecture Non-Custodiale : Un Atout Conformité
+L'architecture de cette API est strictement **100% non-custodiale**. Le backend ne stocke, ne manipule et n'a accès à **aucune clé privée** en clair. 
+Toutes les opérations d'authentification wallet (SIWS) et de validation de transferts reposent sur des preuves cryptographiques côté client et des vérifications *on-chain* publiques. Les transactions de la plateforme (House Wallets) sont isolées via des services externes sécurisés (AWS KMS). 
+Cette absence de conservation des fonds des utilisateurs par l'API simplifie considérablement les démarches de mise en conformité réglementaire.
 
 ---
 
