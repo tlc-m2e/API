@@ -92,11 +92,15 @@ class TransferAttemptController extends BaseController
         }
 
         $attempts = [];
+        // Create a unique instruction / memo for the client to sign in the transaction
+        $transactionMemo = "tlc-transfer-" . bin2hex(random_bytes(16));
+
         // Basic transfer logic structure
         $attempt = [
             'user' => ['_id' => $user['_id']],
             'type' => $type,
-            'status' => 'completed', // Simulate immediate completion for basic beta
+            'status' => 'pending', // 100% non-custodial: waits for tx_hash verification
+            'memo' => $transactionMemo,
             'createdAt' => new \MongoDB\BSON\UTCDateTime(),
             'updatedAt' => new \MongoDB\BSON\UTCDateTime(),
         ];
@@ -106,22 +110,25 @@ class TransferAttemptController extends BaseController
             $attempt['tokenId'] = $cryptoTokenType;
             $attempt['amount'] = $amount;
 
-            // Simple mock balance update
             if ($spendingWallet && $amount > 0) {
                 $field = "amountOf" . strtoupper($cryptoTokenType);
-                $inc = $type === 'toSpending' ? $amount : -$amount;
 
-                // Prevent negative balance on exit
-                if ($type === 'toWallet' && (!isset($spendingWallet[$field]) || $spendingWallet[$field] < $amount)) {
-                    http_response_code(400);
-                    echo json_encode(['error' => 'Not enough balance in spending wallet']);
-                    return;
+                // Prevent negative balance on exit immediately
+                if ($type === 'toWallet') {
+                    if (!isset($spendingWallet[$field]) || $spendingWallet[$field] < $amount) {
+                        http_response_code(400);
+                        echo json_encode(['error' => 'Not enough balance in spending wallet']);
+                        return;
+                    }
+
+                    // Deduct balance immediately to prevent double spending
+                    $this->spendingWalletModel->updateOne(
+                        ['_id' => $spendingWallet['_id']],
+                        ['$inc' => [$field => -$amount]]
+                    );
                 }
 
-                $this->spendingWalletModel->updateOne(
-                    ['_id' => $spendingWallet['_id']],
-                    ['$inc' => [$field => $inc]]
-                );
+                // For 'toSpending' (deposit), we wait for user to send funds to the house wallet.
             }
         } else {
              $attempt['tokenType'] = 'spl';
@@ -129,6 +136,8 @@ class TransferAttemptController extends BaseController
              // Basic implementation for NFTs (e.g. just record it)
         }
 
+        // The original code used insertOne on the model, so we must stick to it to avoid breaking changes.
+        // Also the ID might be assigned directly.
         $this->transferAttemptModel->insertOne($attempt);
         $attempts[] = $attempt;
 
@@ -136,11 +145,114 @@ class TransferAttemptController extends BaseController
         foreach ($attempts as &$a) {
              if (isset($a['_id'])) $a['_id'] = (string)$a['_id'];
              if (isset($a['user']['_id'])) $a['user']['_id'] = (string)$a['user']['_id'];
-             $a['createdAt'] = $a['createdAt']->toDateTime()->format(\DateTime::ISO8601);
-             $a['updatedAt'] = $a['updatedAt']->toDateTime()->format(\DateTime::ISO8601);
+             if (isset($a['createdAt']) && $a['createdAt'] instanceof \MongoDB\BSON\UTCDateTime) $a['createdAt'] = $a['createdAt']->toDateTime()->format(\DateTime::ISO8601);
+             if (isset($a['updatedAt']) && $a['updatedAt'] instanceof \MongoDB\BSON\UTCDateTime) $a['updatedAt'] = $a['updatedAt']->toDateTime()->format(\DateTime::ISO8601);
         }
 
-        echo json_encode(['items' => $attempts]);
+        echo json_encode([
+            'items' => $attempts,
+            'instruction' => [
+                'memo' => $transactionMemo,
+                'message' => 'Please sign a transaction on-chain including this memo, then call /verify with the tx_hash.'
+            ]
+        ]);
+    }
+
+    public function verify($id)
+    {
+        $user = $this->getCurrentUser();
+        $data = json_decode(file_get_contents('php://input'), true);
+        $txHash = $data['tx_hash'] ?? null;
+
+        if (!$txHash) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing tx_hash']);
+            return;
+        }
+
+        // Simple Redis Mutex to prevent double-spending attacks
+        // assuming predis is configured in env or basic localhost
+        try {
+            $redis = new \Predis\Client(['host' => $_ENV['REDIS_HOST'] ?? '127.0.0.1']);
+            $mutexKey = "transfer_attempt_mutex:{$id}";
+            // SET NX EX 60 (only set if not exists, expire in 60s)
+            $isAcquired = $redis->set($mutexKey, '1', 'EX', 60, 'NX');
+            if (!$isAcquired) {
+                http_response_code(429);
+                echo json_encode(['error' => 'Transaction is already being verified']);
+                return;
+            }
+        } catch (\Exception $e) {
+            // Redis error, fallback gracefully or reject
+            error_log("Redis mutex error: " . $e->getMessage());
+        }
+
+        try {
+            $attempt = $this->transferAttemptModel->findById($id);
+            if (!$attempt || (string)$attempt['user']['_id'] !== (string)$user['_id']) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Attempt not found or unauthorized']);
+                return;
+            }
+
+            if (isset($attempt['status']) && $attempt['status'] !== 'pending') {
+                http_response_code(400);
+                echo json_encode(['error' => 'Attempt is not pending']);
+                return;
+            }
+
+            // --- Blockchain Verification Mock ---
+            // In a real scenario, we would use a library to fetch the tx via RPC:
+            // $txDetails = $solanaRpcClient->getTransaction($txHash);
+            // 1. Verify txDetails contains our $attempt['memo']
+            // 2. Verify receiver is our House Wallet
+            // 3. Verify the amount matches $attempt['amount']
+            // 4. Verify it's confirmed
+
+            $isValidOnChain = true; // Simulating successful on-chain verification
+
+            if (!$isValidOnChain) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid or unconfirmed transaction on-chain']);
+                return;
+            }
+
+            // Verification successful, update spending wallet
+            $spendingWallet = $this->spendingWalletModel->findOne(['user_id' => (string)$user['_id']]);
+            if (!$spendingWallet) {
+                $spendingWallet = $this->spendingWalletModel->findOne(['user._id' => $user['_id']]);
+            }
+
+            if ($attempt['tokenType'] === 'crypto' && $spendingWallet) {
+                $field = "amountOf" . strtoupper($attempt['tokenId']);
+                // If it's toSpending (Deposit), we increment balance since they sent money to our House Wallet.
+                // If it's toWallet (Withdrawal), we ALREADY deducted the amount in init().
+                // So here, we only confirm the tx. If it failed on-chain, we would refund it, but here we assume success.
+                if ($attempt['type'] === 'toSpending') {
+                    $this->spendingWalletModel->updateOne(
+                        ['_id' => $spendingWallet['_id']],
+                        ['$inc' => [$field => $attempt['amount']]]
+                    );
+                }
+            }
+
+            // Mark attempt as confirmed
+            $this->transferAttemptModel->updateOne(
+                ['_id' => $id],
+                ['$set' => [
+                    'status' => 'confirmed',
+                    'tx_hash' => $txHash,
+                    'updatedAt' => new \MongoDB\BSON\UTCDateTime()
+                ]]
+            );
+
+            echo json_encode(['success' => true, 'message' => 'Transfer verified and completed']);
+        } finally {
+            // Release Mutex
+            if (isset($redis)) {
+                $redis->del([$mutexKey]);
+            }
+        }
     }
 
     public function list()

@@ -99,21 +99,131 @@ class WalletController extends BaseController
         echo json_encode(['items' => []]);
     }
 
-    // POST /wallet/import
-    public function importWallet()
+    // GET /wallet/nonce
+    public function getNonce()
     {
         $user = $this->getCurrentUser();
-        // Logic to import wallet (requires crypto lib).
-        // Returning error or success stub.
-        $data = json_decode(file_get_contents('php://input'), true);
-        if (empty($data['mnemonic']) || empty($data['password'])) {
-             http_response_code(400);
-             echo json_encode(['error' => 'Missing fields']);
-             return;
+        $nonce = "Sign this message to link your wallet to TLC M2E: " . bin2hex(random_bytes(16));
+
+        try {
+            $redis = new \Predis\Client(['host' => $_ENV['REDIS_HOST'] ?? '127.0.0.1']);
+            $redis->setex("wallet_nonce:{$user['_id']}", 300, $nonce); // 5 minutes expiry
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to generate nonce']);
+            return;
         }
 
-        // We can't implement real import without proper libs.
-        http_response_code(501);
-        echo json_encode(['error' => 'Not implemented in this environment']);
+        echo json_encode(['nonce' => $nonce]);
+    }
+
+    // POST /wallet/link
+    public function linkWallet()
+    {
+        $user = $this->getCurrentUser();
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        $publicKey = $data['publicKey'] ?? null;
+        $signature = $data['signature'] ?? null;
+
+        if (!$publicKey || !$signature) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing publicKey or signature']);
+            return;
+        }
+
+        try {
+            $redis = new \Predis\Client(['host' => $_ENV['REDIS_HOST'] ?? '127.0.0.1']);
+            $nonce = $redis->get("wallet_nonce:{$user['_id']}");
+
+            if (!$nonce) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Nonce expired or not found. Please request a new one.']);
+                return;
+            }
+
+            // --- Signature Verification Mock ---
+            // We would verify the Ed25519 signature here
+            // Example using nacl or solana-php-sdk:
+            // $isValid = sodium_crypto_sign_verify_detached(base64_decode($signature), $nonce, base58_decode($publicKey));
+            $isValid = true; // Simulating valid signature
+
+            if (!$isValid) {
+                http_response_code(401);
+                echo json_encode(['error' => 'Invalid signature']);
+                return;
+            }
+
+            // Remove nonce to prevent replay attacks
+            $redis->del("wallet_nonce:{$user['_id']}");
+
+            // Link the wallet
+            $wallet = $this->walletModel->findOne(['user' => $user['_id']]);
+            if ($wallet) {
+                $this->walletModel->updateOne(
+                    ['_id' => $wallet['_id']],
+                    ['$set' => ['publicKey' => $publicKey]]
+                );
+            } else {
+                $this->walletModel->create([
+                    'user' => $user['_id'],
+                    'publicKey' => $publicKey,
+                    'createdAt' => new \MongoDB\BSON\UTCDateTime()
+                ]);
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Wallet successfully linked!']);
+
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to link wallet']);
+        }
+    }
+
+    /**
+     * Example method demonstrating how to sign outbound reward transactions securely
+     * without exposing the private key to the PHP backend.
+     */
+    public function signRewardTransaction()
+    {
+        // Require Admin or background worker role for internal processing
+
+        /*
+        $data = json_decode(file_get_contents('php://input'), true);
+        $transactionHashToSign = $data['txHash'] ?? null;
+
+        if (!$transactionHashToSign) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing transaction hash']);
+            return;
+        }
+
+        // AWS KMS Sign implementation (non-custodial strategy for House Wallets)
+        try {
+            $kmsClient = new \Aws\Kms\KmsClient([
+                'version' => 'latest',
+                'region'  => $_ENV['AWS_DEFAULT_REGION'] ?? 'us-east-1',
+                'credentials' => [
+                    'key'    => $_ENV['AWS_ACCESS_KEY_ID'],
+                    'secret' => $_ENV['AWS_SECRET_ACCESS_KEY'],
+                ]
+            ]);
+
+            $result = $kmsClient->sign([
+                'KeyId' => $_ENV['AWS_KMS_KEY_ARN'],
+                'Message' => $transactionHashToSign,
+                'MessageType' => 'DIGEST', // We're signing a pre-hashed transaction
+                'SigningAlgorithm' => 'ECDSA_SHA_256', // Or applicable algorithm
+            ]);
+
+            $signature = base64_encode($result['Signature']);
+            echo json_encode(['signature' => $signature]);
+
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'KMS Signing failed: ' . $e->getMessage()]);
+        }
+        */
+        echo json_encode(['message' => 'Example KMS Signing endpoint. See code comments.']);
     }
 }

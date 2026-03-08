@@ -128,7 +128,9 @@ $router->get('/api/wallet/getBalance', [WalletController::class, 'getBalance'], 
 $router->get('/api/wallet/ducksTokensId', [WalletController::class, 'getDucksTokensId'], ['middleware' => [AuthMiddleware::class]]);
 $router->get('/api/wallet/nfts', [WalletController::class, 'getNfts'], ['middleware' => [AuthMiddleware::class]]);
 $router->get('/api/wallet/eggs', [WalletController::class, 'getEggs'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/wallet/import', [WalletController::class, 'importWallet'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/wallet/nonce', [WalletController::class, 'getNonce'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/wallet/link', [WalletController::class, 'linkWallet'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/wallet/signReward', [WalletController::class, 'signRewardTransaction'], ['middleware' => [AuthMiddleware::class]]); // Admin/Internal
 
 // Game Routes (Protected)
 $router->get('/api/entities', [EntityController::class, 'list'], [
@@ -205,6 +207,7 @@ $router->post('/api/workout/recomputeFinalStats/([a-f0-9]{24})', [WorkoutControl
 
 // Transfer Attempt Routes
 $router->post('/api/transfers/attempt/init', [\TLC\Hook\Controllers\TransferAttemptController::class, 'init'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/transfers/attempt/verify/([^/]+)', [\TLC\Hook\Controllers\TransferAttemptController::class, 'verify'], ['middleware' => [AuthMiddleware::class]]);
 $router->get('/api/transfers/attempt/?', [\TLC\Hook\Controllers\TransferAttemptController::class, 'list'], ['middleware' => [AuthMiddleware::class]]);
 $router->get('/api/transfers/attempt/check/([^/]+)', [\TLC\Hook\Controllers\TransferAttemptController::class, 'check'], ['middleware' => [AuthMiddleware::class]]);
 $router->post('/api/transfers/attempt/removeDuplicatesTokensIdNfts', [\TLC\Hook\Controllers\TransferAttemptController::class, 'removeDuplicatesTokensIdNfts'], ['middleware' => [AuthMiddleware::class]]);
