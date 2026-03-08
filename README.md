@@ -97,9 +97,13 @@ Gestion des sessions de sport et des gains associés. Courez pour gagner !
 | `GET` | `/api/workout/passive/estimate` | Estimer les gains passifs. |
 | `POST` | `/api/workout/passive/execute` | Réclamer les gains passifs. |
 
-### 💰 Spending Wallet & Économie
+### 💰 Spending Wallet & Économie (100% Non-Custodial)
 
-Le "Spending Wallet" est le portefeuille interne du jeu.
+Le "Spending Wallet" est le portefeuille interne du jeu. L'architecture a été mise à jour pour être **100% non-custodiale**. Le backend ne manipule ni ne stocke aucune clé privée.
+
+*   **Sign-In With Solana (SIWS)** : Les utilisateurs lient leur Wallet (Phantom, Solflare) via une signature cryptographique d'un *nonce* unique généré par le serveur, empêchant les attaques par rejeu. (`/api/wallet/nonce` et `/api/wallet/link`).
+*   **Transferts Sécurisés** : Pour créditer le Spending Wallet, le client initie une demande (`/api/transfers/attempt/init`), signe une transaction contenant un `memo` spécifique généré par le serveur, et soumet le hash (`tx_hash`) au endpoint de vérification (`/api/transfers/attempt/verify/{id}`). Le backend vérifie *on-chain* la transaction avant d'incrémenter les soldes en base de données de manière sécurisée (utilisation de Redis Mutex anti-double spending).
+*   **House Wallets & Récompenses** : Les envois automatisés (récompenses) s'appuient sur AWS KMS pour signer de manière isolée les transactions sans exposer la clé privée à l'application PHP.
 
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
