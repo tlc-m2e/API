@@ -51,7 +51,7 @@ cd API
 cp .env.example .env
 # Éditer .env pour définir LEGAL_CONSENT=true
 
-# Lancer les services (API, MongoDB/MariaDB, Redis)
+# Lancer les services (API, MariaDB, Redis)
 docker-compose up -d --build
 ```
 
@@ -116,7 +116,7 @@ Le "Spending Wallet" est le portefeuille interne du jeu. L'architecture a été 
 
 *   **Sign-In With Solana (SIWS)** : Les utilisateurs lient leur Wallet (Phantom, Solflare) via une signature cryptographique d'un *nonce* unique généré par le serveur, empêchant les attaques par rejeu. (`/api/wallet/nonce` et `/api/wallet/link`).
 *   **Transferts Sécurisés** : Pour créditer le Spending Wallet, le client initie une demande (`/api/transfers/attempt/init`), signe une transaction contenant un `memo` spécifique généré par le serveur, et soumet le hash (`tx_hash`) au endpoint de vérification (`/api/transfers/attempt/verify/{id}`). Le backend vérifie *on-chain* la transaction avant d'incrémenter les soldes en base de données de manière sécurisée (utilisation de Redis Mutex anti-double spending).
-*   **House Wallets & Récompenses** : Les envois automatisés (récompenses) s'appuient sur AWS KMS pour signer de manière isolée les transactions sans exposer la clé privée à l'application PHP.
+*   **House Wallets & Récompenses** : Les envois automatisés (récompenses) s'appuient sur OVHcloud KMS pour signer de manière isolée les transactions sans exposer la clé privée à l'application PHP.
 
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
@@ -192,9 +192,9 @@ Le projet repose sur une architecture **MVC Custom** située dans le dossier `ho
 
 ### Technologies
 *   **Langage** : PHP 8.4
-*   **Base de données** : MongoDB, MariaDB
+*   **Base de données** : MariaDB
 *   **Cache** : Redis
-*   **Conteneurisation** : Docker (Alpine Linux)
+*   **Conteneurisation** : Docker (Debian)
 
 ---
 
@@ -214,7 +214,7 @@ Il est de la responsabilité de l'opérateur (vous) de s'assurer de la conformit
 
 ### Architecture Non-Custodiale : Un Atout Conformité
 L'architecture de cette API est strictement **100% non-custodiale**. Le backend ne stocke, ne manipule et n'a accès à **aucune clé privée** en clair. 
-Toutes les opérations d'authentification wallet (SIWS) et de validation de transferts reposent sur des preuves cryptographiques côté client et des vérifications *on-chain* publiques. Les transactions de la plateforme (House Wallets) sont isolées via des services externes sécurisés (AWS KMS). 
+Toutes les opérations d'authentification wallet (SIWS) et de validation de transferts reposent sur des preuves cryptographiques côté client et des vérifications *on-chain* publiques. Les transactions de la plateforme (House Wallets) sont isolées via des services externes sécurisés (OVHcloud KMS).
 Cette absence de conservation des fonds des utilisateurs par l'API simplifie considérablement les démarches de mise en conformité réglementaire.
 
 ---

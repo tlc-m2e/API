@@ -18,7 +18,7 @@ class StorageService
         $endpoint = $_ENV['OVH_S3_ENDPOINT'] ?? 'https://s3.gra.io.cloud.ovh.net';
         $key = $_ENV['OVH_S3_ACCESS_KEY'] ?? '';
         $secret = $_ENV['OVH_S3_SECRET_KEY'] ?? '';
-        $this->bucket = $_ENV['OVH_S3_BUCKET_NAME'] ?? '';
+        $this->bucket = $_ENV['OVH_S3_BUCKET'] ?? '';
         $this->kmsKeyId = $_ENV['OVH_KMS_KEY_ID'] ?? null;
 
         $this->client = new S3Client([

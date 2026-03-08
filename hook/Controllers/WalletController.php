@@ -198,25 +198,57 @@ class WalletController extends BaseController
             return;
         }
 
-        // AWS KMS Sign implementation (non-custodial strategy for House Wallets)
+        // OVH KMS Sign implementation (non-custodial strategy for House Wallets)
         try {
-            $kmsClient = new \Aws\Kms\KmsClient([
-                'version' => 'latest',
-                'region'  => $_ENV['AWS_DEFAULT_REGION'] ?? 'us-east-1',
-                'credentials' => [
-                    'key'    => $_ENV['AWS_ACCESS_KEY_ID'],
-                    'secret' => $_ENV['AWS_SECRET_ACCESS_KEY'],
-                ]
+            $endpoint = $_ENV['OVH_KMS_ENDPOINT'] ?? '';
+            $kmsKeyId = $_ENV['OVH_KMS_KEY_ID'] ?? '';
+
+            $url = rtrim($endpoint, '/') . "/api/v2/kms/keys/{$kmsKeyId}/operations/sign";
+
+            $payload = json_encode([
+                'message' => base64_encode($transactionHashToSign),
+                // Additional parameters like algorithm might be needed based on exact OKMS spec
             ]);
 
-            $result = $kmsClient->sign([
-                'KeyId' => $_ENV['AWS_KMS_KEY_ARN'],
-                'Message' => $transactionHashToSign,
-                'MessageType' => 'DIGEST', // We're signing a pre-hashed transaction
-                'SigningAlgorithm' => 'ECDSA_SHA_256', // Or applicable algorithm
+            $certPath = $_ENV['OVH_KMS_CERT_PATH'] ?? '';
+            $keyPath = $_ENV['OVH_KMS_KEY_PATH'] ?? '';
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Accept: application/json'
             ]);
 
-            $signature = base64_encode($result['Signature']);
+            if ($certPath && file_exists($certPath)) {
+                curl_setopt($ch, CURLOPT_SSLCERT, $certPath);
+            }
+            if ($keyPath && file_exists($keyPath)) {
+                curl_setopt($ch, CURLOPT_SSLKEY, $keyPath);
+            }
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($error) {
+                throw new \Exception("cURL Error: " . $error);
+            }
+
+            if ($httpCode >= 400) {
+                throw new \Exception("HTTP Error " . $httpCode . ": " . $response);
+            }
+
+            $result = json_decode($response, true);
+
+            if (!isset($result['signature'])) {
+                throw new \Exception('Failed to sign transaction.');
+            }
+
+            $signature = $result['signature'];
             echo json_encode(['signature' => $signature]);
 
         } catch (\Exception $e) {
