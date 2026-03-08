@@ -1,8 +1,11 @@
-# THE LIFE COINCOIN API 🦆🪙
+# WHITE LABEL M2E API 🏃‍♂️🪙
 
-Bienvenue sur l'API officielle de **THE LIFE COINCOIN**, une application "Move-to-Earn" gamifiée intégrée, clé en main pour que n'importe qui puisse créer son M2E.
+Bienvenue sur le moteur M2E "White Label", basé sur l'architecture de **THE LIFE COINCOIN**.
+Ce projet a été refactorisé pour être **100% SQL (MariaDB)** et entièrement **dynamique** (Marque Blanche).
 
-Cette API est propulsée par le framework **Universal API** de THE LIFE COINCOIN et modifiée par **Vibe coder**, garantissant performance, sécurité et scalabilité. Le principe est simple : courir et gagner de l'argent !
+Chaque aspect du jeu (noms, monnaies, règles, entités) est défini dynamiquement par une configuration en base de données MariaDB. Fini les références statiques !
+
+Cette API est propulsée par le framework **Universal API**, garantissant performance, sécurité et scalabilité. Le principe est simple : courir et gagner de l'argent !
 
 ---
 
@@ -10,16 +13,16 @@ Cette API est propulsée par le framework **Universal API** de THE LIFE COINCOIN
 
 *   **Move-to-Earn** : Suivi des entraînements (GPS), calcul des récompenses (courir pour gagner), et mode passif.
 *   **Écosystème Web3** : Gestion de Wallet "Spending" avec multiples devises (SOL, COIN, TOKEN, Seed).
-*   **Gamification** :
-    *   Gestion d'équipe de Canards (Main & Support).
-    *   Élevage d'Oeufs.
+*   **Gamification (Marque Blanche)** :
+    *   Gestion d'équipe d'Entités (Personnages génériques).
+    *   Noms de monnaies, récompenses, et cooldowns dynamiques gérés via `game_constants`.
     *   Système d'Énergie et d'Endurance.
 *   **Marketplace** : Achat et vente d'actifs in-game.
 *   **Sécurité Avancée** : Authentification JWT, 2FA (TOTP), OTP par Email, et Social Logins (Google, Facebook, Discord, X).
 *   **Social & Amis** : Système de demande d'amis, suivi en temps réel de la course des amis, profils publics/privés.
 *   **Intégration IA** : Utilisation d'IA pour analyser les entraînements et bien plus.
 *   **Administration** : Outils complets pour la gestion des utilisateurs, des wallets et des constantes de jeu.
-*   **Base de données Agnostique** : Compatible MongoDB et MariaDB.
+*   **Base de données SQL** : Refactorisation complète pour utiliser MariaDB via PDO.
 
 ---
 
@@ -105,15 +108,15 @@ Le "Spending Wallet" est le portefeuille interne du jeu.
 | `GET` | `/api/spending/duckTeam` | Voir l'équipe de canards active (Main/Support). |
 | `GET` | `/api/spending/stats` | Statistiques globales du joueur. |
 
-### 🦆 Mécaniques de Jeu (Canards & Oeufs)
+### 🏃 Mécaniques de Jeu (Entités Généralisées)
 
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
-| `GET` | `/api/ducks` | Liste de tous les canards du joueur. |
-| `GET` | `/api/ducks/{id}` | Détails d'un canard spécifique. |
-| `POST` | `/api/ducks/{id}/levelup` | Monter le niveau d'un canard. |
-| `GET` | `/api/eggs` | Liste des oeufs. |
-| `GET` | `/api/eggs/{id}` | Détails d'un oeuf. |
+| `GET` | `/api/entities` | Liste de toutes les entités du joueur. |
+| `GET` | `/api/entities/{id}` | Détails d'une entité spécifique. |
+| `POST` | `/api/entities/{id}/levelup` | Monter le niveau d'une entité. |
+| `GET` | `/api/eggs` | Liste des œufs/lootboxes (legacy). |
+| `GET` | `/api/eggs/{id}` | Détails d'un œuf/lootbox. |
 
 ### ⚡ Énergie & Stats
 

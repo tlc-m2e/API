@@ -1,7 +1,7 @@
 <?php
 
 use TLC\Hook\Controllers\AuthController;
-use TLC\Hook\Controllers\DuckController;
+use TLC\Hook\Controllers\EntityController;
 use TLC\Hook\Controllers\EncryptionController;
 use TLC\Hook\Controllers\FriendController;
 use TLC\Hook\Controllers\LevelUpController;
@@ -131,13 +131,13 @@ $router->get('/api/wallet/eggs', [WalletController::class, 'getEggs'], ['middlew
 $router->post('/api/wallet/import', [WalletController::class, 'importWallet'], ['middleware' => [AuthMiddleware::class]]);
 
 // Game Routes (Protected)
-$router->get('/api/ducks', [DuckController::class, 'list'], [
+$router->get('/api/entities', [EntityController::class, 'list'], [
     'middleware' => [AuthMiddleware::class]
 ]);
-$router->get('/api/ducks/([a-f0-9]{24})', [DuckController::class, 'get'], [
+$router->get('/api/entities/([a-f0-9]{24})', [EntityController::class, 'get'], [
     'middleware' => [AuthMiddleware::class]
 ]);
-$router->post('/api/ducks/([a-f0-9]{24})/levelup', [DuckController::class, 'levelUp'], [
+$router->post('/api/entities/([a-f0-9]{24})/levelup', [EntityController::class, 'levelUp'], [
     'middleware' => [AuthMiddleware::class]
 ]);
 
@@ -232,11 +232,11 @@ $router->get('/api/swarmGen/mint/([a-f0-9]{24})/([a-f0-9]{24})', [\TLC\Hook\Cont
 $router->post('/api/swarmGen/mint', [\TLC\Hook\Controllers\MintController::class, 'executeMint'], ['middleware' => [AuthMiddleware::class]]);
 
 // --- SwarmGen Level Up Routes ---
-$router->post('/api/swarmGen/levelUp/duck/([a-f0-9]{24})', [LevelUpController::class, 'levelUp'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/swarmGen/levelUp/duck/([a-f0-9]{24})/accelerate', [LevelUpController::class, 'accelerate'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/swarmGen/levelUp/duck/([a-f0-9]{24})/unlockPocket', [LevelUpController::class, 'unlockPocket'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/swarmGen/levelUp/duck/([a-f0-9]{24})/attributes', [LevelUpController::class, 'attributes'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/swarmGen/levelUp/duck/([a-f0-9]{24})', [LevelUpController::class, 'getInfo'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/levelUp/entity/([a-f0-9]{24})', [LevelUpController::class, 'levelUp'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/levelUp/entity/([a-f0-9]{24})/accelerate', [LevelUpController::class, 'accelerate'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/levelUp/entity/([a-f0-9]{24})/unlockPocket', [LevelUpController::class, 'unlockPocket'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/levelUp/entity/([a-f0-9]{24})/attributes', [LevelUpController::class, 'attributes'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/levelUp/entity/([a-f0-9]{24})', [LevelUpController::class, 'getInfo'], ['middleware' => [AuthMiddleware::class]]);
 // --- SwarmGen Collections Routes ---
 $router->get('/api/swarmGen/collections/?', [CollectionController::class, 'list']); // Public
 
@@ -259,26 +259,26 @@ $router->get('/api/swarmGen/egg/([^/]+)/getEggs', [EggController::class, 'getEgg
 $router->get('/api/swarmGen/egg/([^/]+)/getEgg/([a-f0-9]{24})', [EggController::class, 'getEggByCollectionAndId'], ['middleware' => [AuthMiddleware::class]]);
 $router->post('/api/swarmGen/egg/([^/]+)/create', [EggController::class, 'create'], ['middleware' => [AuthMiddleware::class]]);
 
-// --- SwarmGen Duck Routes ---
-$router->get('/api/swarmGen/duck/importTest', [DuckController::class, 'importTest']); // Public
+// --- SwarmGen Entity Routes ---
+$router->get('/api/swarmGen/entity/importTest', [EntityController::class, 'importTest']); // Public
 
 // Specific Admin/Static routes first
-$router->get('/api/swarmGen/duck/stats', [DuckController::class, 'stats'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/swarmGen/duck/admin', [DuckController::class, 'adminList'], ['middleware' => [AuthMiddleware::class]]);
-$router->put('/api/swarmGen/duck/updateOwnership/([a-f0-9]{24})', [DuckController::class, 'updateOwnership'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/swarmGen/duck/getDuck/([a-f0-9]{24})', [DuckController::class, 'getDuckById'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/entity/stats', [EntityController::class, 'stats'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/entity/admin', [EntityController::class, 'adminList'], ['middleware' => [AuthMiddleware::class]]);
+$router->put('/api/swarmGen/entity/updateOwnership/([a-f0-9]{24})', [EntityController::class, 'updateOwnership'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/entity/getEntity/([a-f0-9]{24})', [EntityController::class, 'getEntityById'], ['middleware' => [AuthMiddleware::class]]);
 
 // Dynamic ID routes
-$router->get('/api/swarmGen/duck/([a-f0-9]{24})/get', [DuckController::class, 'getDuckDetail'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/swarmGen/duck/([a-f0-9]{24})/set', [DuckController::class, 'setDuck'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/entity/([a-f0-9]{24})/get', [EntityController::class, 'getEntityDetail'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/entity/([a-f0-9]{24})/set', [EntityController::class, 'setEntity'], ['middleware' => [AuthMiddleware::class]]);
 
 // Dynamic Collection routes
-$router->get('/api/swarmGen/duck/([^/]+)/getDucksForUser/([a-f0-9]{24})', [DuckController::class, 'getDucksForUser'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/swarmGen/duck/([^/]+)/getDucks', [DuckController::class, 'getDucks'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/swarmGen/duck/([^/]+)/getDuck/([a-f0-9]{24})', [DuckController::class, 'getDuckByCollectionAndId'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/swarmGen/duck/([^/]+)/deleteAllTokensId', [DuckController::class, 'deleteAllTokensId'], ['middleware' => [AuthMiddleware::class]]);
-$router->get('/api/swarmGen/duck/([^/]+)/generate', [DuckController::class, 'generate'], ['middleware' => [AuthMiddleware::class]]);
-$router->post('/api/swarmGen/duck/([^/]+)/create', [DuckController::class, 'create'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/entity/([^/]+)/getEntitiesForUser/([a-f0-9]{24})', [EntityController::class, 'getEntitiesForUser'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/entity/([^/]+)/getEntities', [EntityController::class, 'getEntities'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/entity/([^/]+)/getEntity/([a-f0-9]{24})', [EntityController::class, 'getEntityByCollectionAndId'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/entity/([^/]+)/deleteAllTokensId', [EntityController::class, 'deleteAllTokensId'], ['middleware' => [AuthMiddleware::class]]);
+$router->get('/api/swarmGen/entity/([^/]+)/generate', [EntityController::class, 'generate'], ['middleware' => [AuthMiddleware::class]]);
+$router->post('/api/swarmGen/entity/([^/]+)/create', [EntityController::class, 'create'], ['middleware' => [AuthMiddleware::class]]);
 
 // Friends routes
 $router->post('/api/friends/request', [FriendController::class, 'sendRequest'], ['middleware' => [AuthMiddleware::class]]);

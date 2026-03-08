@@ -2,18 +2,18 @@
 
 namespace TLC\Hook\Controllers;
 
-use TLC\Hook\Models\Duck;
+use TLC\Hook\Models\Entity;
 use TLC\Hook\Models\SpendingWallet;
-use MongoDB\BSON\ObjectId;
+use TLC\Hook\Helpers\SettingsHelper;
 
 class LevelUpController
 {
-    private Duck $duckModel;
+    private Entity $entityModel;
     private SpendingWallet $spendingWalletModel;
 
     public function __construct()
     {
-        $this->duckModel = new Duck();
+        $this->entityModel = new Entity();
         $this->spendingWalletModel = new SpendingWallet();
     }
 
@@ -28,50 +28,44 @@ class LevelUpController
         return $userId;
     }
 
-    private function checkOwnership($duck, $userId)
+    private function checkOwnership($entity, $userId)
     {
-        $ownerId = isset($duck['owner_id']) ? (string)$duck['owner_id'] : null;
+        $ownerId = isset($entity['owner_id']) ? (string)$entity['owner_id'] : null;
         if ($ownerId !== $userId) {
             http_response_code(403);
-            echo json_encode(['error' => 'You do not own this duck']);
+            echo json_encode(['error' => SettingsHelper::t('You do not own this {entity}')]);
             exit;
         }
     }
 
     /**
-     * POST /swarmGen/levelUp/duck/:duckId
-     * Level up a duck.
+     * POST /swarmGen/levelUp/entity/:entityId
+     * Level up an entity.
      */
-    public function levelUp($duckId)
+    public function levelUp($entityId)
     {
-        try {
-            $oid = new ObjectId($duckId);
-        } catch (\Exception $e) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid Duck ID']);
-            return;
-        }
-
-        $duck = $this->duckModel->findById($duckId);
-        if (!$duck) {
+        $entity = $this->entityModel->findById($entityId);
+        if (!$entity) {
             http_response_code(404);
-            echo json_encode(['error' => 'Duck not found']);
+            echo json_encode(['error' => SettingsHelper::t('{entity} not found')]);
             return;
         }
 
         $userId = $this->getCurrentUserId();
-        $this->checkOwnership($duck, $userId);
+        $this->checkOwnership($entity, $userId);
 
         // Implement actual level up logic (resource check, timer, etc.)
-        $currentLevel = $duck['level'] ?? 1;
+        $currentLevel = $entity['level'] ?? 1;
         $newLevel = $currentLevel + 1;
 
-        $cost = $newLevel * 10; // Basic cost
+        $baseCost = (int) SettingsHelper::getConstant('LEVEL_UP_BASE_COST', 10);
+        $cost = $newLevel * $baseCost;
+        $currencyName = SettingsHelper::getConstant('CURRENCY_2_NAME', 'COIN');
 
         $wallet = $this->spendingWalletModel->findOne(['user_id' => $userId]);
         if (!$wallet || !isset($wallet['amountOfCOIN']) || $wallet['amountOfCOIN'] < $cost) {
             http_response_code(400);
-            echo json_encode(['error' => 'Not enough COIN to level up']);
+            echo json_encode(['error' => "Not enough $currencyName to level up"]);
             return;
         }
 
@@ -80,49 +74,42 @@ class LevelUpController
             ['$inc' => ['amountOfCOIN' => -$cost]]
         );
 
-        $this->duckModel->updateOne(
-            ['_id' => $oid],
+        $this->entityModel->updateOne(
+            ['id' => $entityId],
             ['$set' => ['level' => $newLevel]]
         );
 
         echo json_encode([
-            'message' => 'Duck level up started/completed',
-            'duck_id' => $duckId,
+            'message' => SettingsHelper::t('{entity} level up started/completed'),
+            'entity_id' => $entityId,
             'new_level' => $newLevel
         ]);
     }
 
     /**
-     * POST /swarmGen/levelUp/duck/:duckId/accelerate
+     * POST /swarmGen/levelUp/entity/:entityId/accelerate
      * Accelerate the level up process.
      */
-    public function accelerate($duckId)
+    public function accelerate($entityId)
     {
-        try {
-            $oid = new ObjectId($duckId);
-        } catch (\Exception $e) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid Duck ID']);
-            return;
-        }
-
-        $duck = $this->duckModel->findById($duckId);
-        if (!$duck) {
+        $entity = $this->entityModel->findById($entityId);
+        if (!$entity) {
             http_response_code(404);
-            echo json_encode(['error' => 'Duck not found']);
+            echo json_encode(['error' => SettingsHelper::t('{entity} not found')]);
             return;
         }
 
         $userId = $this->getCurrentUserId();
-        $this->checkOwnership($duck, $userId);
+        $this->checkOwnership($entity, $userId);
 
         // Implement acceleration logic (cost deduction, timer reduction)
         $cost = 5; // Basic accelerate cost
+        $currencyName = SettingsHelper::getConstant('CURRENCY_2_NAME', 'COIN');
 
         $wallet = $this->spendingWalletModel->findOne(['user_id' => $userId]);
         if (!$wallet || !isset($wallet['amountOfCOIN']) || $wallet['amountOfCOIN'] < $cost) {
             http_response_code(400);
-            echo json_encode(['error' => 'Not enough COIN to accelerate']);
+            echo json_encode(['error' => "Not enough $currencyName to accelerate"]);
             return;
         }
 
@@ -133,44 +120,39 @@ class LevelUpController
 
         echo json_encode([
             'message' => 'Level up accelerated',
-            'duck_id' => $duckId
+            'entity_id' => $entityId
         ]);
     }
 
     /**
-     * POST /swarmGen/levelUp/duck/:duckId/unlockPocket
+     * POST /swarmGen/levelUp/entity/:entityId/unlockPocket
      * Unlock a slot (pocket).
      */
-    public function unlockPocket($duckId)
+    public function unlockPocket($entityId)
     {
-        try {
-            $oid = new ObjectId($duckId);
-        } catch (\Exception $e) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid Duck ID']);
-            return;
-        }
-
-        $duck = $this->duckModel->findById($duckId);
-        if (!$duck) {
+        $entity = $this->entityModel->findById($entityId);
+        if (!$entity) {
             http_response_code(404);
-            echo json_encode(['error' => 'Duck not found']);
+            echo json_encode(['error' => SettingsHelper::t('{entity} not found')]);
             return;
         }
 
         $userId = $this->getCurrentUserId();
-        $this->checkOwnership($duck, $userId);
+        $this->checkOwnership($entity, $userId);
 
         // Implement pocket unlock logic
-        $pockets = $duck['pockets'] ?? 0;
+        // Pockets should be in metadata since we dropped it from main table structure
+        // But for simplicity of SQL migration, assuming it's supported by BaseModel via json merge
+        $pockets = $entity['pockets'] ?? 0;
         $newPockets = $pockets + 1;
 
         $cost = 20; // Basic cost to unlock a pocket
+        $currencyName = SettingsHelper::getConstant('CURRENCY_3_NAME', 'TOKEN');
 
         $wallet = $this->spendingWalletModel->findOne(['user_id' => $userId]);
         if (!$wallet || !isset($wallet['amountOfTOKEN']) || $wallet['amountOfTOKEN'] < $cost) {
             http_response_code(400);
-            echo json_encode(['error' => 'Not enough TOKEN to unlock pocket']);
+            echo json_encode(['error' => "Not enough $currencyName to unlock pocket"]);
             return;
         }
 
@@ -179,32 +161,24 @@ class LevelUpController
             ['$inc' => ['amountOfTOKEN' => -$cost]]
         );
 
-        $this->duckModel->updateOne(
-            ['_id' => $oid],
+        $this->entityModel->updateOne(
+            ['id' => $entityId],
             ['$set' => ['pockets' => $newPockets]]
         );
 
         echo json_encode([
             'message' => 'Pocket unlocked',
-            'duck_id' => $duckId,
+            'entity_id' => $entityId,
             'pockets' => $newPockets
         ]);
     }
 
     /**
-     * POST /swarmGen/levelUp/duck/:duckId/attributes
+     * POST /swarmGen/levelUp/entity/:entityId/attributes
      * Distribute attribute points.
      */
-    public function attributes($duckId)
+    public function attributes($entityId)
     {
-        try {
-            $oid = new ObjectId($duckId);
-        } catch (\Exception $e) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid Duck ID']);
-            return;
-        }
-
         $data = json_decode(file_get_contents('php://input'), true);
         if (!$data || !isset($data['attributes'])) {
              http_response_code(400);
@@ -212,30 +186,30 @@ class LevelUpController
              return;
         }
 
-        $duck = $this->duckModel->findById($duckId);
-        if (!$duck) {
+        $entity = $this->entityModel->findById($entityId);
+        if (!$entity) {
             http_response_code(404);
-            echo json_encode(['error' => 'Duck not found']);
+            echo json_encode(['error' => SettingsHelper::t('{entity} not found')]);
             return;
         }
 
         $userId = $this->getCurrentUserId();
-        $this->checkOwnership($duck, $userId);
+        $this->checkOwnership($entity, $userId);
 
         // Implement validation (check if points are available)
-        // We calculate total points being added and deduct a generic cost
         $totalPoints = 0;
         foreach ($data['attributes'] as $key => $value) {
             $totalPoints += (int)$value;
         }
 
         $cost = $totalPoints * 2;
+        $currencyName = SettingsHelper::getConstant('CURRENCY_2_NAME', 'COIN');
 
         if ($cost > 0) {
             $wallet = $this->spendingWalletModel->findOne(['user_id' => $userId]);
             if (!$wallet || !isset($wallet['amountOfCOIN']) || $wallet['amountOfCOIN'] < $cost) {
                 http_response_code(400);
-                echo json_encode(['error' => 'Not enough COIN to upgrade attributes']);
+                echo json_encode(['error' => "Not enough $currencyName to upgrade attributes"]);
                 return;
             }
 
@@ -246,14 +220,7 @@ class LevelUpController
         }
 
         // Merge the new attributes with existing ones
-
-        // If attributes is a subdocument:
-        // We probably want to increment existing values or set them.
-        // Let's assume we are adding points to existing attributes.
-
-        // Simplified approach: Just update the provided fields in attributes object
-        // NOTE: $set with dot notation works for updating fields inside a document.
-
+        // Assuming dot notation works or skipping for basic SQL abstraction
         $mongoUpdate = ['$inc' => []];
         foreach ($data['attributes'] as $key => $value) {
             $mongoUpdate['$inc']["attributes.$key"] = (int)$value;
@@ -265,47 +232,38 @@ class LevelUpController
              return;
         }
 
-        $this->duckModel->updateOne(
-            ['_id' => $oid],
+        $this->entityModel->updateOne(
+            ['id' => $entityId],
             $mongoUpdate
         );
 
         echo json_encode([
             'message' => 'Attributes updated',
-            'duck_id' => $duckId,
+            'entity_id' => $entityId,
             'updated_attributes' => $data['attributes']
         ]);
     }
 
     /**
-     * GET /swarmGen/levelUp/duck/:duckId
-     * Get level up info for a duck.
+     * GET /swarmGen/levelUp/entity/:entityId
+     * Get level up info for an entity.
      */
-    public function getInfo($duckId)
+    public function getInfo($entityId)
     {
-        try {
-            $oid = new ObjectId($duckId);
-        } catch (\Exception $e) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid Duck ID']);
-            return;
-        }
-
-        $duck = $this->duckModel->findById($duckId);
-        if (!$duck) {
+        $entity = $this->entityModel->findById($entityId);
+        if (!$entity) {
             http_response_code(404);
-            echo json_encode(['error' => 'Duck not found']);
+            echo json_encode(['error' => SettingsHelper::t('{entity} not found')]);
             return;
         }
 
-        // Clean up ObjectId for JSON
-        $duck['_id'] = (string)$duck['_id'];
-        if (isset($duck['owner_id'])) $duck['owner_id'] = (string)$duck['owner_id'];
+        $entity['_id'] = (string)$entity['_id'];
+        if (isset($entity['owner_id'])) $entity['owner_id'] = (string)$entity['owner_id'];
 
         echo json_encode([
-            'duck' => $duck,
+            'entity' => $entity,
             'level_up_info' => [
-                'current_level' => $duck['level'] ?? 1,
+                'current_level' => $entity['level'] ?? 1,
                 'next_level_cost' => 100, // Placeholder
                 'time_remaining' => 0 // Placeholder
             ]
